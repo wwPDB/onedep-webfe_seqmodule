@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- 
+     File: index.html  
+     Date: 24-May-2014
+
+     This is the standalone entry point -- All changes need to be coordinated with summary_template.html
+-->
+
+<head>
+  <title>Sequence Viewer</title>
+  <!--#include virtual="/seqmodule/includes/seqmodule_css.html"-->
+  <!--#include virtual="/seqmodule/includes/seqmodule_summary_javascript.html"-->
+</head>
+
+<body class="oneColLiqCtrHdr">
+  <div id="container">
+    <!--#include virtual="/seqmodule/includes/seqmodule_header.html"-->
+
+    <div id="mainContent"> <br />
+      <div class="errmsg ui-state-error ui-corner-all noprint"></div>
+      <div class="warnmsg ui-state-highlight ui-corner-all noprint"></div>
+      <br class="clearfloat" />
+      <!-- progress bar -->
+      <div id="timer"></div>
+
+      <!-- Standalone input form -->
+      <div id="loadfrmSAsection" class="fltlft noprint">
+	<input type="hidden" name="sessionid" id="sessionid1" value="" />
+	<form name="loadfrmSA" id="loadfrmSA" method="post" enctype="multipart/form-data">
+          <label for="identifier">Data Set ID <span id="example">[?]</span>:</label>
+          <input name="identifier" id="identifier" value="" />
+          <strong>OR</strong>
+          <label for="file">  mmCIF Data File:</label>
+          <input type="file" name="file" id="file" />
+          <select name="filetype">
+            <option value="pdbx-cif" selected="selected">PDBx/mmCIF Model</option>
+            <option value="rcsb-mmcif">RCSB/mmCIF Model</option>
+            <option value="rcsb-cifeps">RCSB/CIFeps Model</option>
+          </select>
+<!--
+          <label for="saved_session_id">Session ID:</label>
+          <input name="saved_session_id" id="saved_session_id" value="" />
+-->
+          <input type="submit" name="go" id="go" value="Go" />
+	</form>
+      </div> <!-- end of standalone form -->
+
+    <div class="fltrgt noprint width75">
+<!--
+      <input type="button" id="savesession" name="savesession" value="Save Session" class="displaynone fltrgt" />
+-->
+      <input type="button" id="closecompleted" name="closecompleted" value="All Done" class="displaynone fltrgt" />
+      <input type="button" id="closeunfinished" name="closeunfinished" value="Quit for Now" class="displaynone fltrgt" />
+      <input type="button" id="saveselect" name="saveselect" value="Save Assignments" class="displaynone fltrgt" />
+      <button id="downloadlink" class="displaynone fltrgt">Download</button>
+
+      <input type="button" id="rerun" name="rerun" value="Re-Run Blast" class="displaynone fltlft" />
+      <input type="button" id="reload" name="reload" value="Re-Load Summary" class="displaynone fltlft" />
+      <input type="button" id="polymerlinkage" name="polymerlinkage" value="View Unusual Linkages" class="displaynone fltlft" />
+
+      <!--
+      <input type="button" id="reset" name="reset" value="Reset" class="displaynone fltlft" />
+      -->
+      <span id="viewalign_grp" class="displaynone fltrgt">
+	<select id="viewalign_ordering" name="viewalign_ordering" class="displaynone">
+	  <option value="auth-xyz-ref" selected="selected">AUTH-XYZ-REF</option>
+	  <option value="auth-ref-xyz">AUTH-REF-XYZ</option>
+	  <option value="xyz-auth-ref">XYZ-AUTH-REF</option>
+	  <option value="xyz-ref-auth">XYZ-REF-AUTH</option>
+	  <option value="ref-auth-xyz">REF-AUTH-XYZ</option>
+	  <option value="ref-xyz-auth">REF-XYZ-AUTH</option>
+	</select>
+	<input type="button" id="viewalign" name="viewalign" value="View Alignment" class="displaynone" />
+	<input type="button" id="viewalignframebutton" name="viewalignframebutton" value="View Alignment" class="displaynone" />
+      </span>
+
+      <br class="clearfloat" />
+    </div>
+
+    <form id="rerun_form" class="fltrgt noprint width75 displaynone bgcolcurrent">
+        <br class="clearfloat" />
+        <div id="form_selection"></div>
+        <br class="clearfloat" />
+        <input type="button" name="submit_rerun_form" id="submit_rerun_form" value="Run Blast Search" />
+    </form>
+    <br class="clearfloat" />
+    <br />
+    <!-- This is container for the server supplied summary data -->
+    <div id="res"></div>
+    
+    <br class="clearfloat" />
+    <br />
+
+    <div id="warningmessage" title="Warning Messages"></div>
+    <div id="polymertable" title="Polymer Linkage Table"></div>
+    <div id="dialogloadnewform"></div>
+      <div id="dialogtaxonomyform"></div>          
+    <br />
+      <!-- progress spinner -->
+      <div id="progress-dialog">
+	<div id="loadingcontent">
+          <p id="loadingspinner">
+            Creating alignment summary ...
+          </p>
+	</div>
+      </div>
+    <!-- end #mainContent -->
+    </div>
+    <!-- end #container -->
+    <!--#include virtual="/seqmodule/includes/seqmodule_footer.html"-->
+  </div>
+
+    <!-- This form provides context for loading and saving data -->
+    <form name="loadfrm" id="loadfrm" method="post">
+      <input  class="displaynone" name="sessionid" id="sessionid2" value="" />
+      <input  class="displaynone" name="identifier" id="identifier2" value="" />
+      <input  class="displaynone" name="instance" id="instance2" value="" />
+
+      <input type="hidden" name="classid" id="classid2" value="SA" />
+      <input type="hidden" name="filesource" id="filesource2" value="session" />
+    </form>
+
+  <!--    This form provides context for launching alignment view  -->
+  <form name="alignform" id="alignform" action="/service/sequence_editor/align_view" target="alignview-frame" method="post">
+    <input class="displaynone"  name="sessionid" id="sessionidF" value="" />
+    <input class="displaynone"  name="identifier" id="identifierF" value="" />
+    <input class="displaynone"  name="instance" id="instanceF" value="" />
+    <input class="displaynone"  name="alignids" id="alignidsF" value="" />
+    <input class="displaynone"  name="selectids" id="selectidsF" value="" />
+    <input class="displaynone"  name="activegroupid" id="activegroupidF" value="" />
+    <input class="displaynone"  name="viewalign_order" id="viewalign_order" value="auth-xyz-ref" />
+  </form>
+
+  <!--  This iframe is the target for alignment view. Note that iframe name and id must be the same for this to work in firefox -->
+  <iframe id="alignview-frame" name="alignview-frame" class="displaynone" allowtransparency="true" frameborder="0" 
+	  scrolling="auto" style="width:100%;height:100%"></iframe>
+
+</body>
+</html>

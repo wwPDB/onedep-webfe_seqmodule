@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- 
+     File:  alignView_template.html
+     Date:  27-Nov-2013
+     
+     <!doctype html>
+     <html xmlns="http://www.w3.org/1999/xhtml">
+-->
+<head>
+  <title>Sequence Alignment View</title>
+  <!--#include virtual="/seqmodule/includes/seqmodule_css.html"-->
+  <!--#include virtual="/seqmodule/includes/seqmodule_alignview_javascript.html"-->
+</head>
+
+<body class="oneColLiqCtrHdr">
+<div id="container">
+  <!--#include virtual="/seqmodule/includes/seqmodule_header.html"-->
+
+  <br class="clearfloat" />
+  <div id="mainContent">
+    <div class="warnmsg ui-state-highlight ui-corner-all noprint"></div>
+    <p class="noprint"> <span class="dashedborder fltlft">
+      <select id="viewer" name="viewer" class="displaynone">
+        <option value="jsmol" selected="selected">Jsmol</option>
+        <option value="jmol">Jmol</option>
+        <!-- <option value="astex">Astex</option> -->
+      </select>
+      <input type="button" id="view3d" name="view3d" value="Load 3D Viewer" class="displaynone" />
+      </span> <span class="dashedborder fltlft">
+      <select id="gedittype" name="gedittype" class="displaynone">
+        <option value="no-mismatch" class="no-mismatch" selected="selected"></option>
+        <option value="cf-all-mismatch" class="inp-ala-gly" >ALL</option>
+        <option value="cf-ala-gly" class="inp-ala-gly" >ALA/GLY</option>
+        <option value="cf-asp-asn" class="inp-asp-asn" >ASP/ASN</option>
+        <option value="cf-glu-gln" class="inp-glu-gln" >GLU/GLN</option>
+        <option value="cf-met-mse" class="inp-met-mse" >MET/MSE</option>
+        <option value="cf-other-mismatch" class="inp-ala-gly" >OTHER</option>
+      </select>
+      <input type="button" id="predefgedit" name="predefgedit" value="Change" class="displaynone" />
+      </span>
+      <span class="dashedborder fltlft">
+          <input type="button" id="activate_shift" name="activate_shift" value="Activate Move" class="displaynone" />
+      </span>
+      <input type="button" id="deleteselect" name="deleteselect" value="Mark for Deletion" class="displaynone fltlft" />
+      <input type="button" id="makeglobaledit" name="makeglobaledit" value="Make Global Edit" class="displaynone fltlft" />
+      <input type="button" id="clearselect" name="clearselect" value="Clear Selection" class="displaynone fltlft" />
+      <input type="button" id="undo" name="undo" value="Undo" class="displaynone fltlft" />
+      <input type="button" id="go" name="go" value="Save Alignment" class="displaynone fltrgt" />
+      <input type="button" id="closewindow" name="closewindow" value="Close Window" class="displaynone fltrgt" />
+      <br class="clearfloat" />
+    </p>
+    <div id="annotationview"></div>    
+    <br class="clearfloat" />
+
+    <div class="errmsg ui-state-error ui-corner-all"></div>
+    <div id="feedback" class="ui-state-highlight ui-corner-all displaynone"></div>
+
+    <br class="clearfloat" />
+    <div id="result"></div>
+    <div id="tableview"></div>
+    <br class="clearfloat" />
+    <div id="molviewer" title="3D Viewer"></div>
+    <div id="globaldialog" title="Change Selected Values"></div>
+    <div id="warningmessage" title="Warning Messages"></div>
+    <br />
+    <div class="ui-state-highlight ui-corner-all noprint">
+      <p>Color legend:
+		<span class="ui-icon ui-icon-info fltlft"></span>
+		<span class="bgcolconflict smallbox">Conflicts</span>
+		<span class="bgcoldelete smallbox">Deleted Residues</span>
+		<span class="bgcolundo smallbox">Undo</span>
+		<span class="bgcolreplace smallbox">Replace</span>
+		<span class="bgcolinsert smallbox">Insert</span>
+		<span class="bgcoldna smallbox">DNA</span>
+		<span class="bgcolrna smallbox">RNA</span>
+		<span class="bgxyzlink smallbox">Unusual linkage</span>
+		<span class="bgxyzdisorder smallbox">Disorder</span>
+		<span class="bgxyzocc smallbox">Low occupancy</span>
+		<span class="bgxyzhetero smallbox">Heterogeneity</span>
+		<br class="clearfloat" />
+      </p>
+    </div>
+    <br />
+    <br />
+    <!-- end #mainContent -->
+
+    <!-- progress spinner -->
+    <div id="progress-dialog">
+      <div id="loadingcontent">
+        <p id="loadingspinner">
+          Computing alignment... 
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <br class="clearfloat" />
+  <!--#include virtual="/seqmodule/includes/seqmodule_footer.html"-->
+  <!-- end #container -->
+</div>
+</body>
+</html>

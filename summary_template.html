@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- 
+     File: summary_template.html  
+     Date: 24-May-2014
+
+     This is the workflow entry point -- All changes need to be coordinated with index.html/summary_template.html
+-->
+
+<head>
+  <title>Sequence Viewer</title>
+  <!--#include virtual="/seqmodule/includes/seqmodule_css.html"-->
+  <!--#include virtual="/seqmodule/includes/seqmodule_summary_javascript.html"-->
+</head>
+
+<body class="oneColLiqCtrHdr">
+  <div id="container">
+    <!--#include virtual="/seqmodule/includes/seqmodule_header.html"-->
+
+    <div id="mainContent">
+      <div class="errmsg ui-state-error ui-corner-all noprint"></div>
+      <div class="warnmsg ui-state-highlight ui-corner-all noprint"></div>
+
+      <div class="fltlft noprint width40"> 
+	<span>
+	  <span id="loading_message" class="padtop6 fltlft"><b>Loading data set:&nbsp;</b> %(identifier)s</span>
+          <!-- <span id="timer"></span> -->
+	</span>
+      </div>
+
+      <br class="clearfloat" />
+      <div class="fltrgt noprint width75">
+<!--
+        <input type="button" id="savesession" name="savesession" value="Save Session" class="displaynone fltrgt" />
+-->
+	<input type="button" id="closecompleted" name="closecompleted" value="All Done" class="displaynone fltrgt" />
+	<input type="button" id="closeunfinished" name="closeunfinished" value="Quit for Now" class="displaynone fltrgt" />
+	<input type="button" id="saveselect" name="saveselect" value="Save Assignments" class="displaynone fltrgt" />
+	<button id="downloadlink" class="displaynone fltrgt">Download</button>
+
+        <input type="button" id="rerun" name="rerun" value="Re-Run Blast" class="displaynone fltlft" />
+	<input type="button" id="reload" name="reload" value="Re-Load Summary" class="displaynone fltlft" />
+	<input type="button" id="polymerlinkage" name="polymerlinkage" value="View Unusual Linkages" class="displaynone fltlft" />
+
+	<!--
+	    <input type="button" id="reset" name="reset" value="Reset" class="displaynone fltlft" />
+	    -->
+	<span id="viewalign_grp" class="displaynone fltrgt">
+	  <select id="viewalign_ordering" name="viewalign_ordering" class="displaynone">
+	    <option value="auth-xyz-ref" selected="selected">AUTH-XYZ-REF</option>
+	    <option value="auth-ref-xyz">AUTH-REF-XYZ</option>
+	    <option value="xyz-auth-ref">XYZ-AUTH-REF</option>
+	    <option value="xyz-ref-auth">XYZ-REF-AUTH</option>
+	    <option value="ref-auth-xyz">REF-AUTH-XYZ</option>
+	    <option value="ref-xyz-auth">REF-XYZ-AUTH</option>
+	  </select>
+
+	  <!-- deprecated <input type="button" id="viewalign" name="viewalign" value="View Alignment (detached)" class="displaynone" /> -->
+	  <input type="button" id="viewalignframebutton" name="viewalignframebutton" value="View Alignment" class="displaynone" />
+	</span>
+
+	<br class="clearfloat" />
+      </div>
+
+      <form id="rerun_form" class="fltrgt noprint width75 displaynone bgcolcurrent">
+          <br class="clearfloat" />
+          <div id="form_selection"></div>
+          <br class="clearfloat" />
+          <input type="button" name="submit_rerun_form" id="submit_rerun_form" value="Run Blast Search" />
+      </form>
+      <br class="clearfloat" />
+
+      <!-- This is container for the server supplied summary data -->
+      <div id="res"></div>
+
+      <br class="clearfloat" />
+      <br />
+      <br />      
+
+      <div id="warningmessage" title="Warning Messages"></div>
+      <div id="polymertable" title="Polymer Linkage Table"></div>
+      <div id="dialogloadnewform"></div>
+      <div id="dialogtaxonomyform"></div>      
+
+
+
+      <!-- progress spinner -->
+      <div id="progress-dialog">
+	<div id="loadingcontent">
+          <p id="loadingspinner">
+            Creating alignment summary ...
+          </p>
+	</div>
+      </div>
+
+    </div>       <!-- end #mainContent -->
+
+    <br class="clearfloat" />
+
+    <!-- This form provides context for loading and saving data -->
+    <form name="loadfrm" id="loadfrm" method="post">
+      <!-- Templated form values supplied at launch  -- These hidden form elements are treated as r/o -->
+      <input type="hidden" name="identifier" id="identifier" value="%(identifier)s" />
+      <input type="hidden" name="instance" id="instance" value="%(instance)s" />
+      <input type="hidden" name="classid" id="classid" value="%(classid)s" />
+      <input type="hidden" name="filesource" id="filesource" value="%(filesource)s" />
+    </form>
+
+    <!--#include virtual="/seqmodule/includes/seqmodule_footer.html"-->
+  </div>   <!-- end #container -->
+
+  <!--   This form is provides the context to launch the alignment view -->
+  <form name="alignform" id="alignform" action="/service/sequence_editor/align_view" target="alignview-frame" method="post">
+    <!-- Templated form values supplied at launch  -- These hidden form elements are treated as r/o -->
+    <input type="hidden" name="sessionid" id="sessionidF" value="%(sessionid)s" />
+    <input type="hidden" name="identifier" id="identifierF" value="%(identifier)s" />
+    <input type="hidden" name="instance" id="instanceF" value="%(instance)s" />
+    <!-- These form values are updated when form is submitted -->
+    <input class="displaynone"  name="alignids" id="alignidsF" value="" />
+    <input class="displaynone"  name="selectids" id="selectidsF" value="" />
+    <input class="displaynone"  name="activegroupid" id="activegroupidF" value="" />
+    <input class="displaynone"  name="viewalign_order" id="viewalign_orderF" value="auth-xyz-ref" />
+
+  </form>
+
+  <div id="confirm-dialog"></div>
+
+  <!--  This iframe is the target for alignment view. Note that iframe name and id must be the same for this to work in firefox -->
+  <iframe id="alignview-frame" name="alignview-frame" class="displaynone" allowtransparency="true" 
+	  frameborder="0" scrolling="auto" style="width:%(width)s;height:%(height)s"></iframe>
+</body>
+</html>
