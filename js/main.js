@@ -46,7 +46,7 @@ function iframeCloser() {
         }
         if ($.isFunction(parentWindow.hideAlignViewFrame)) {
             //console.log("Invoking iframe close method");
-            parentWindow.hideAlignViewFrame(updateFlag);
+            parentWindow.hideAlignViewFrame(updateFlag, selectIds);
         } else {
             console.log(">>>WARNING -Can't find iframe destroy method");
         }
@@ -76,7 +76,8 @@ function handleCLoseWindow() {
 $(document).ready(function() {
     var debugFlag = false;
     var ajaxTimeout = 0;
-    var adminContact = 'Send comments to: <a href="mailto:help@wwpdb-dev.rutgers.edu">help@wwpdb-dev.rutgers.edu</a>';
+    // var adminContact = 'Send comments to: <a href="mailto:help@wwpdb-dev.rutgers.edu">help@wwpdb-dev.rutgers.edu</a>';
+    var adminContact = '';
     var errStyle = '<span class="ui-icon ui-icon-alert fltlft"></span> ';
     var infoStyle = '<span class="ui-icon ui-icon-info fltlft"></span> ';
     var seqStartURL = "/service/sequence_editor/store_alignment/start";
@@ -312,47 +313,52 @@ $(document).ready(function() {
                             }
 
                             $('#identifier-sect').html("<b>Data set:</b>&nbsp; " + resOBJ.identifier + "<br /><b>Title:</b>&nbsp; " + resOBJ.title).removeClass('displaynone');
-                            //
-                            alignIds = resOBJ.alaignids;
+                            if ("alignids" in resOBJ) alignIds = resOBJ.alignids;
+                            if ("selectids" in resOBJ) selectIds = resOBJ.selectids;
                             if (resOBJ.conflictreportflag) {
                                 $('#tableview').load(resOBJ.conflictreportpath);
                             } else {
                                 $('#tableview').html('<p></p>');
                             }
+
                             if (resOBJ.annotationreportflag) {
                                 $('#annotationview').load(resOBJ.annotationreportpath);
                             } else {
                                 $('#annotationview').html('<p></p>');
                             }
 
-                            $('#result').load(resOBJ.htmlcontentpath, function() {
-                                $.getScript('/seqmodule/js/seqtt.js');
-                                $('#molviewer').dialog({
-                                    bgiframe: true,
-                                    autoOpen: false,
-                                    modal: false,
-                                    height: 700,
-                                    width: 700,
-                                    close: function(event, ui) {
-                                        $("#view3d, #viewer").attr("disabled", false);
-                                        $("#molviewer").empty();
-                                    }
+                            if ("htmlcontentpath" in resOBJ) {
+                                $('#result').load(resOBJ.htmlcontentpath, function() {
+                                    $.getScript('/seqmodule/js/seqtt.js');
+                                    $('#molviewer').dialog({
+                                        bgiframe: true,
+                                        autoOpen: false,
+                                        modal: false,
+                                        height: 700,
+                                        width: 700,
+                                        close: function(event, ui) {
+                                            $("#view3d, #viewer").attr("disabled", false);
+                                            $("#molviewer").empty();
+                                        }
+                                    });
+                                    $('#globaldialog').dialog({
+                                        bgiframe: true,
+                                        autoOpen: false,
+                                        modal: true,
+                                        height: 700,
+                                        width: 700,
+                                        close: function(event, ui) {
+                                            $('#makeglobaledit').attr("disabled", false);
+                                            $('#globaldialog').empty();
+                                        }
+                                    });
+                                    loadEditable();
+                                    loadSortable();
+                                    loadSelectable();
                                 });
-                                $('#globaldialog').dialog({
-                                    bgiframe: true,
-                                    autoOpen: false,
-                                    modal: true,
-                                    height: 700,
-                                    width: 700,
-                                    close: function(event, ui) {
-                                        $('#makeglobaledit').attr("disabled", false);
-                                        $('#globaldialog').empty();
-                                    }
-                                });
-                                loadEditable();
-                                loadSortable();
-                                loadSelectable();
-                            });
+                            } else {
+                                $('#result').html('<p></p>');
+                            }
                             alignTagVal = resOBJ.aligntag;
                             $('#go, #view3d, #viewer, #predefgedit, #activate_shift, #gedittype, #closewindow').show();
                             $('#view3d, #viewer').attr("disabled", false);
@@ -370,16 +376,35 @@ $(document).ready(function() {
                                 alert(resOBJ.debug);
                             }
                             progressEnd();
+                        } else if (procStatus == 'failed') {
+                            if (resOBJ.warningflag) {
+                                $('#warningmessage').html(resOBJ.warningtext).dialog("open");
+                            }
+
+                            $('#identifier-sect').html("<b>Data set:</b>&nbsp; " + resOBJ.identifier + "<br /><b>Title:</b>&nbsp; " + resOBJ.title).removeClass('displaynone');
+
+                            $('#tableview').html('<p></p>');
+                            $('#result').html('<p></p>');
+
+                            if (resOBJ.annotationreportflag) {
+                                $('#annotationview').load(resOBJ.annotationreportpath);
+                            } else {
+                                $('#annotationview').html('<p></p>');
+                            }
+                            $('#closewindow').show();
+                            progressEnd();
                         }
                     }
                 });
             } while (procStatus == 'running');
             if (procStatus != 'completed') {
+            $('#closewindow').show();
                 progressEnd();
                 $('.errmsg').html(errStyle + 'Failed to load alignment and conflict table. Current status is ' +
                     procStatus + '<br />\n' + adminContact).show().delay(30000).slideUp(800);
             }
         } catch (err) {
+            $('#closewindow').show();
             progressEnd();
             console.log(err);
             $('.errmsg').html(errStyle + 'Error: ' + JSON.stringify(jsonOBJ) + '<br />\n' +
@@ -626,7 +651,8 @@ $(document).ready(function() {
                         $(gotoId).addClass("ui-selected");
                     }
                 });
-                if ((seqType != "ref") || (seqType == "ref" && aTrmnlRsdueIsSlctd == true)) {
+                // if ((seqType != "ref") || (seqType == "ref" && aTrmnlRsdueIsSlctd == true)) {
+                if ((seqType == "auth") || (seqType == "ref" && aTrmnlRsdueIsSlctd == true)) {
                     currentSelection.each(function(i) {
                         deleteArr.push($(this).attr('id') + '|' + $(this).html());
                     });

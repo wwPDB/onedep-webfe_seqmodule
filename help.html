@@ -36,24 +36,34 @@
 
         <div id="linkages">
           <h4>"View Unusual Linkages" button:</h4>
-          <p>Display a table of atypically long polymer linkages.
+          <p>Display a table of atypically long polymer linkages.</p>
 	</div>   
 
         <div id="save">
           <h4>"Save Assignments" button:</h4>
-          <p>Saves current selections and annotation results in an assignment file and the merges these assignments into the current model file.
+          <p>Saves current selections and annotation results in an assignment file and the merges these assignments into the current model file.</p>
 	</div>   
 
 	<div>
           <h4>"Quit for now" button:</h4>
           <p>End the current session without updating assignment and model files in the archive directory. </p>
-	  <p>This option will save current selections that will be reused if the module is restarted from the workflow manager interface.
+	  <p>This option will save current selections that will be reused if the module is restarted from the workflow manager UI interface.</p>
 	</div>
         
 	<div>
 	  <h4>"All Done" button:</h4>
           <p>End the current session and update the archive with any save assignments.</p>
 	  <p>This option does not save assignments or create a new model file. You must click on the "Save" button to do so.</p>
+	</div>
+
+	<div>
+          <h4>"Save in-progress sequence annotation to archive" button:</h4>
+	  <p>This option will save current selections into archive directory. The saved information will be reused if a new sequence workflow is started from the workflow manager.</p>
+	</div>
+
+	<div>
+          <h4>"Remove in-progress sequence annotation from archive" button:</h4>
+	  <p>This option will remove the saved current selections from archive directory.</p>
 	</div>
 
     	<div id="select">
@@ -131,8 +141,8 @@
 			Successive clicks on "Save Alignment" button creates a new version of the output file.</p>
         </div>
         <div id="undoedits">
-        	<h4>To incrementally undo any edits:</h4>
-			Clicking on the "Undo" button will undo the most recent edit action. Such that if there were a series of edit actions, successive clicks on "Undo" will rollback each of these edits from most recent to least recent for all edit actions undertaken since the beginning of the editing session or since the "Save Alignment" button was last pressed.
+                <h4>To incrementally undo any edits:</h4>
+             <p>Clicking on the "Undo" button will undo the most recent edit action. Such that if there were a series of edit actions, successive clicks on "Undo" will rollback each of these edits from most recent to least recent for all edit actions undertaken since the beginning of the editing session or since the "Save Alignment" button was last pressed.
 			</p>
         </div>
     </div>

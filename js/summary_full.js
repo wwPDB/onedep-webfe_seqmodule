@@ -58,7 +58,8 @@ var polymerURL = '/service/sequence_editor/polymer_linkage_table';
 var saveURL = '/service/sequence_editor/save';
 var closeCompletedURL = '/service/sequence_editor/close_completed';
 var closeUnfinishedURL = '/service/sequence_editor/close_unfinished';
-var saveSessionURL = '/service/sequence_editor/save_session_info';
+var savePartialAssignmentURL = '/service/sequence_editor/save_partial_assignment';
+var removePartialAssignmentURL = '/service/sequence_editor/remove_partial_assignment';
 var loadNewDbRef = '/service/sequence_editor/load_form/seqdbref';
 var loadNewTaxonomy = '/service/sequence_editor/load_form/taxonomy';
 var loadEntityReview = '/service/sequence_editor/load_form/entityreview';
@@ -81,23 +82,24 @@ var groupIdListFlag=false;
 var entityIdList = [];
 var entryIdentifier = '';
 
-function hideAlignViewFrame(doUpdate) {
+function hideAlignViewFrame(doUpdate, updatedSelectIds) {
     $('#alignview-frame').addClass('displaynone');
     $('#container').show();
     //console.log("Returning with updateFlag=" + doUpdate);
     if (doUpdate == 'yes') {
-	doReloadSummary();
+	doReloadSummary(updatedSelectIds);
     }
 }
 
-function doReloadSummary() {
+function doReloadSummary(updatedSelectIds) {
     resetBtns();
     $('.errmsg').empty().hide();
     $('.warnmsg').empty().hide();
     $('#res').empty();
-    $('#saveselect, #closecompleted, #savesession, #closeunfinished,  #viewalignframebutton, #viewalign_ordering, #downloadlink').hide();
+    $('#saveselect, #savepartial, #closecompleted, #closeunfinished,  #viewalignframebutton, #viewalign_ordering, #downloadlink').hide();
     $('#rerun, #reload, #polymerlinkage').hide();
-    $.ajax({url: reLoadSummaryURL,data: {'sessionid': sessionID, 'allalignids': allAlignIds, 'selectids': selectIds,'activegroupid': activeGroupID},
+    $.ajax({url: reLoadSummaryURL,
+            data: {'sessionid': sessionID, 'allalignids': allAlignIds, 'selectids': selectIds, 'updatedids': updatedSelectIds, 'activegroupid': activeGroupID},
 	    success: function (jsonOBJ) {
                 resetOnLoad(jsonOBJ);
 	    }
@@ -131,9 +133,9 @@ function resetBtns() {
         selectIds += ((selectIds.length > 0) ? ',' : '') + $(this).parent().parent().attr('id');
     });
     if (selectIds.length > 0) {
-            $('#saveselect, #closecompleted, #savesession, #closeunfinished, #reset').show();
+            $('#saveselect, #savepartial, #closecompleted, #closeunfinished, #reset').show();
     } else {
-            $('#saveselect, #close').hide();
+            $('#saveselect, #savepartial, #close').hide();
     }
     $('#res .aligneles:checked').each(function() {
         allAlignIds += ((allAlignIds.length > 0) ? ',' : '') + $(this).parent().parent().attr('id');
@@ -351,6 +353,13 @@ function ValidateFormTaxonomy() {
 
     function resetOnLoad(jsonOBJ) {
 	try {
+            $('#removepartial').hide();
+            if (('haspartialassignment' in jsonOBJ) &&  jsonOBJ.haspartialassignment) {
+                $('#removepartial').show();
+            }
+            if ('entrywarningmessage' in jsonOBJ) {
+                $('.errmsg').html(infoStyle + jsonOBJ.entrywarningmessage).show();
+            }
             entryIdentifier = jsonOBJ.identifier;
 	    //
 	    $('#identifier-sect').html("<b>Data set:</b> " + jsonOBJ.identifier + '<br/><b>Title:</b> ' + jsonOBJ.title).removeClass('displaynone');
@@ -432,7 +441,7 @@ function ValidateFormTaxonomy() {
 
 		$('.loadseqdbref').click(function(){
 		    var refId=$(this).parent().prev().find('a').attr('id');
-		    $.getJSON(loadNewDbRef,{"sessionid":sessionID,activegroupid:activeGroupID,"ref_id":refId,'selectids':selectIds},function(jsonOBJ){
+		    $.getJSON(loadNewDbRef,{"sessionid":sessionID,"identifier":entryIdentifier,activegroupid:activeGroupID,"ref_id":refId,'selectids':selectIds},function(jsonOBJ){
 			$('#dialogloadnewform').html(jsonOBJ.htmlcontent).dialog("open");
 			$('.ief').ief({
 			    onstart:function(){
@@ -545,7 +554,7 @@ function ValidateFormTaxonomy() {
 				    $('#dialogtaxonomyform').dialog("close");
 				    resetBtns();
 				    $('#res').empty();
-				    $('#saveselect,  #closecompleted, #savesession, #closeunfinished,  #viewalign_grp,  #viewalignframebutton, #viewalign_ordering, #downloadlink').hide();
+				    $('#saveselect, #savepartial, #closecompleted, #closeunfinished,  #viewalign_grp,  #viewalignframebutton, #viewalign_ordering, #downloadlink').hide();
 				    $('#rerun, #reload, #polymerlinkage, #reset').hide();
 				    $.ajax({url:reLoadURL,data:{"sessionid":sessionID,"activegroupid":activeGroupID}, success:function(jsonOBJ) {
 				       checkSummaryStatus(jsonOBJ, reLoadCheckURL); }
@@ -612,14 +621,14 @@ function ValidateFormTaxonomy() {
 
 		resetBtns();
 		$('#res .refselection').click(function() {
-		    doReloadSummary();
+		    doReloadSummary('');
 		});
 		$('#res .aligneles').click(function() {
 		    resetBtns();
 		});
 		//$('#dbsrch_go, #taxsrch_go').val('Go').attr('disabled', false);
 
-		$('.errmsg').empty().hide();
+		// $('.errmsg').empty().hide();
 		$('.refdiv table').each(function() {
 		    $(this).find('tr:gt(1)').hide();
 		});
@@ -825,7 +834,7 @@ $(document).ready(function() {
 						     $('#sessionid1').val(sessionID);
 						     $('#go').val('Loading...').prop('disabled', true);
 						     $('#res').empty();
-						     $('#saveselect, #closecompleted, #savesession, #closeunfinished, #viewalign_grp, #viewalignframebutton, #viewalign_ordering, #rerun, #reset, #reload, #polymerlinkage, #downloadlink').hide();
+						     $('#saveselect, #savepartial, #closecompleted, #closeunfinished, #viewalign_grp, #viewalignframebutton, #viewalign_ordering, #rerun, #reset, #reload, #polymerlinkage, #downloadlink').hide();
 						     $('.srchdiv').addClass('displaynone');
 						     progressStart('');
 						 }, success: function (jsonOBJ) {
@@ -852,7 +861,7 @@ $(document).ready(function() {
 						     activeGroupID = 1;
 						     formData.push({'name': 'sessionid', 'value': sessionID});
 						     $('#res').html('');
-						     $('#saveselect, #closecompleted, #savesession, #closeunfinished, #viewalignframebutton, #viewalign_ordering, #rerun, #reset, #reload, #polymerlinkage, #downloadlink').hide();
+						     $('#saveselect, #savepartial, #closecompleted, #closeunfinished, #viewalignframebutton, #viewalign_ordering, #rerun, #reset, #reload, #polymerlinkage, #downloadlink').hide();
 						     $('.srchdiv').addClass('displaynone');
 						     progressStart('');
 						 }, success: function (jsonOBJ) {
@@ -898,7 +907,7 @@ $(document).ready(function() {
         selection_text += individual_selection_text;
         $('#form_selection').html(selection_text).show();
         $('#rerun_form').show();
-        // doReloadSummary();
+        // doReloadSummary('');
     });
 
     $('#submit_rerun_form').click(function() {
@@ -918,7 +927,7 @@ $(document).ready(function() {
         $.ajax({ url: rerunBlastURL, dataType: 'json', data: { 'identifier': entryIdentifier, 'sessionid' : sessionID, 'entityids' : slected_entities },
              beforeSend: function() {
                   $('#res').html('');
-                  $('#saveselect, #closecompleted, #savesession, #closeunfinished, #viewalignframebutton, #viewalign_ordering, #rerun, #reset, #reload, #polymerlinkage, #downloadlink').hide();
+                  $('#saveselect, #savepartial, #closecompleted, #closeunfinished, #viewalignframebutton, #viewalign_ordering, #rerun, #reset, #reload, #polymerlinkage, #downloadlink').hide();
                   $('.srchdiv').addClass('displaynone');
                   $('#rerun_form').hide();
                   progressStart('');
@@ -929,7 +938,7 @@ $(document).ready(function() {
     });
 
     $('#reload').click(function() {
-	    doReloadSummary();
+	    doReloadSummary('');
     });
 
     $('#saveselect').click(function() {
@@ -943,10 +952,13 @@ $(document).ready(function() {
 				      } else if ( groupIdList.length > 1) {
 					  $('.errmsg').html(infoStyle + "Entities " + groupIdList.toString() + " have not been visited." ).show();
 				      }
+			              progressStart('Saving ...');
 				  },
 				  success: function (jsonOBJ, statusText) {
+				      progressEnd();
 				      if (jsonOBJ.errorflag) {
-					      $('.errmsg').append('<br />' + infoStyle +  jsonOBJ.errortext).show();
+					      // $('.errmsg').append('<br />' + infoStyle +  jsonOBJ.errortext).show();
+					      $('.errmsg').html( infoStyle +  jsonOBJ.errortext).show();
 					      $('#saveselect').show();
 				      } else {
 					      $('.errmsg').append('<br />' + infoStyle + 'Selection saved.').show();
@@ -956,9 +968,51 @@ $(document).ready(function() {
 			              if (jsonOBJ.warningflag) {
 				     	      $('#warningmessage').html(jsonOBJ.warningtext).dialog("open");
 			              }
+			              if (('removepartialassignment' in jsonOBJ) &&  jsonOBJ.removepartialassignment) {
+			                     $('#removepartial').hide();
+			              }
 				  }
 				 });
     });
+
+    $('#savepartial').click(function() {
+         $('#loadfrm').ajaxSubmit({url: savePartialAssignmentURL, clearForm: false, dataType: 'json',
+              beforeSubmit: function (formData, jqForm, options) {
+                   formData.push({"name": "selectids", "value": selectIds}, {"name": "sessionid", "value": sessionID});
+                   $('#savepartial').hide();
+                   progressStart('Saving ...');
+              },
+              success: function (jsonOBJ, statusText) {
+                   progressEnd();
+                   if (jsonOBJ.errorflag) {
+                        $('.errmsg').append('<br />' + infoStyle +  jsonOBJ.errortext).show();
+                        $('#savepartial').show();
+                   } else {
+                        $('.errmsg').append('<br />' + infoStyle + 'In-progress sequence annotation saved.').show();
+                        $('#savepartial, #removepartial').show();
+                   }
+                   if (jsonOBJ.warningflag) {
+                        $('#warningmessage').html(jsonOBJ.warningtext).dialog("open");
+                   }
+              }
+         });
+    });
+
+    $('#removepartial').click(function() {
+         $('#loadfrm').ajaxSubmit({url: removePartialAssignmentURL, clearForm: false, dataType: 'json',
+              beforeSubmit: function (formData, jqForm, options) {
+                   formData.push({"name": "sessionid", "value": sessionID});
+                   $('#removepartial').hide();
+                   progressStart('Removing ...');
+              },
+              success: function (jsonOBJ, statusText) {
+                   progressEnd();
+                   $('.errmsg').append('<br />' + infoStyle + 'In-progress sequence annotation removed.').show();
+                   $('#removepartial').hide();
+              }
+         });
+    });
+
     $('#downloadlink').click(function(){
     	download(downloadUrl,
     		 [
@@ -974,20 +1028,6 @@ $(document).ready(function() {
 
     $('#closeunfinished').click(function() {
 	confirmFinish(closeUnfinishedURL);
-    });
-
-    $('#savesession').click(function() {
-        $.ajax({ url: saveSessionURL, dataType: 'json', data: { 'identifier': entryIdentifier, 'sessionid' : sessionID },
-             beforeSend: function() {
-                  progressStart('');
-             }, success: function (jsonOBJ) {
-                  progressEnd();
-                  $('.warnmsg').html(infoStyle + jsonOBJ.htmlcontent).show().delay(5000).fadeOut(100);
-             }, error: function (data, status, e) {
-                  progressEnd();
-                  $('.errmsg').html(errStyle + e).show();
-             }
-        });
     });
 
     // We attach the #showmore to the mainContent as it will not be present
