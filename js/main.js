@@ -26,6 +26,7 @@ edit operations and also saves the alignment.
  5-Jun-2014 jdw : unbind keydown on close
 *********************************************************************/
 var updateFlag;
+var alignBlockList = [];
 
 function iframeCloserX() {
 
@@ -89,8 +90,8 @@ $(document).ready(function() {
     var seqMovURL = "/service/sequence_editor/move";
     var jmolURL = "/service/sequence_editor/molviewer/jmol";
     var astexURL = "/service/sequence_editor/molviewer/astexviewer";
-    var globalformURL = "/service/sequence_editor/global_edit_form";
     var globalmenuURL = "/service/sequence_editor/global_edit_menu";
+    var globaleditURL = "/service/sequence_editor/global_edit";
     var seqEditOpId = 0;
     var seqEditType = 0;
     var alignTagVal = "";
@@ -216,7 +217,7 @@ $(document).ready(function() {
             strokeWidth: 1
         });
         $("#gedittype").hide();
-        $('#molviewer,#globaldialog').dialog({
+        $('#molviewer').dialog({
             autoOpen: false
         });
         loadReload('load');
@@ -255,7 +256,7 @@ $(document).ready(function() {
                 "activegroupid": activeGroupId,
                 "BIGBUGS": "MYBUGS"
             };
-            $("#go, #deleteselect, #clearselect, #view3d, #viewer, #makeglobaledit, #closewindow, " +
+            $("#go, #deleteselect, #clearselect, #view3d, #viewer, #makeblockedit, #closewindow, " +
                 "#undo, #feedback, #predefgedit, #activate_shift, #gedittype, .errmsg .warnmsg").hide();
             $('#result, #tableview').html('');
             updateFlag = 'yes';
@@ -289,9 +290,6 @@ $(document).ready(function() {
             if ($('#molviewer').dialog('isOpen')) {
                 $('#molviewer').dialog('close').empty();
             }
-            if ($('#globaldialog').dialog('isOpen')) {
-                $('#globaldialog').dialog('close').empty();
-            }
             do {
                 $.ajax({
                     url: seqCheckURL,
@@ -315,6 +313,7 @@ $(document).ready(function() {
                             $('#identifier-sect').html("<b>Data set:</b>&nbsp; " + resOBJ.identifier + "<br /><b>Title:</b>&nbsp; " + resOBJ.title).removeClass('displaynone');
                             if ("alignids" in resOBJ) alignIds = resOBJ.alignids;
                             if ("selectids" in resOBJ) selectIds = resOBJ.selectids;
+                            if ("alignmentblocklist" in resOBJ) alignBlockList = resOBJ.alignmentblocklist.split(",");
                             if (resOBJ.conflictreportflag) {
                                 $('#tableview').load(resOBJ.conflictreportpath);
                             } else {
@@ -325,6 +324,10 @@ $(document).ready(function() {
                                 $('#annotationview').load(resOBJ.annotationreportpath);
                             } else {
                                 $('#annotationview').html('<p></p>');
+                            }
+
+                            if ("blockedithtml" in resOBJ) {
+                                $('#blockeditdialog').html(resOBJ.blockedithtml);
                             }
 
                             if ("htmlcontentpath" in resOBJ) {
@@ -341,17 +344,6 @@ $(document).ready(function() {
                                             $("#molviewer").empty();
                                         }
                                     });
-                                    $('#globaldialog').dialog({
-                                        bgiframe: true,
-                                        autoOpen: false,
-                                        modal: true,
-                                        height: 700,
-                                        width: 700,
-                                        close: function(event, ui) {
-                                            $('#makeglobaledit').attr("disabled", false);
-                                            $('#globaldialog').empty();
-                                        }
-                                    });
                                     loadEditable();
                                     loadSortable();
                                     loadSelectable();
@@ -360,7 +352,7 @@ $(document).ready(function() {
                                 $('#result').html('<p></p>');
                             }
                             alignTagVal = resOBJ.aligntag;
-                            $('#go, #view3d, #viewer, #predefgedit, #activate_shift, #gedittype, #closewindow').show();
+                            $('#go, #view3d, #viewer, #predefgedit, #activate_shift, #makeblockedit, #gedittype, #closewindow').show();
                             $('#view3d, #viewer').attr("disabled", false);
                             $('#undo').hide();
                             if (debugFlag) {
@@ -426,38 +418,7 @@ $(document).ready(function() {
         $('.ui-selected, .ui-selectee').each(function() {
             $(this).removeClass("ui-selected ui-selectee");
         });
-        $('#deleteselect, #makeglobaledit, #clearselect').hide();
-    }
-
-    function conflictform() {
-        $('#globalfrm').ajaxForm({
-            target: '#formmsg',
-            clearForm: true,
-            success: function(jsonOBJ) {
-                try {
-                    $.each(jsonOBJ.editlist, function(i, key) {
-                        $("#" + i).html(key.val3).removeClass(key.classRemove).addClass(key.classAdd).bt(key.tooltip, toolTipConfig);
-                        if (key.id) {
-                            $("#" + key.id).html(key.val).removeClass(key.classRemove).addClass(key.classAdd).bt(key.tooltip, toolTipConfig);
-                        }
-                        seqEditOpId = key.editopid;
-                        seqEditType = key.edittype;
-                    });
-                    clearSelection();
-                    globalSelectedIds = "";
-                    $('#makeglobaledit').attr("disabled", false);
-                    if (seqEditOpId != 0) {
-                        $('#undo').show();
-                    } else {
-                        $('#undo').hide();
-                    }
-                    $('#globaldialog').dialog('close');
-                } catch (err) {
-                    $('.errmsg').html(errStyle + 'Error: ' + JSON.stringify(jsonOBJ) + '<br />\n' +
-                        adminContact).show().delay(30000).slideUp(800);
-                }
-            }
-        });
+        $('#deleteselect, #clearselect').hide();
     }
 
     function loadEditable() {
@@ -612,7 +573,7 @@ $(document).ready(function() {
         $('.pickable').selectable({
             delay: 2,
             start: function() {
-                $("#makeglobaledit, #deleteselect, #clearselect").hide();
+                $("#deleteselect, #clearselect").hide();
                 clearSelection();
             },
             stop: function() {
@@ -699,7 +660,7 @@ $(document).ready(function() {
             delay: 2,
             filter: 'tr',
             start: function() {
-                $('#makeglobaledit, #deleteselect, #clearselect').hide();
+                $('#deleteselect, #clearselect').hide();
                 clearSelection();
             },
             stop: function() {
@@ -741,10 +702,45 @@ $(document).ready(function() {
                     $('#clearselect').show().attr("disabled", false);
                 }
                 if (globalSelectedIds.length > 0) {
-                    $('#makeglobaledit').show().attr("disabled", false);
+                    $('#makeblockedit').show().attr("disabled", false);
                 }
             }
         });
+    }
+
+    function getLiIdList(seqType, seqInstId) {
+        var liIdList = [];
+        for (var i = 0; i < alignBlockList.length; i++) {
+             $('#' + seqType + '_' + seqInstId + '_' + alignBlockList[i] + ' li').each(function() {
+                  liIdList.push($(this).attr('id'));
+             });
+        }
+        return liIdList;
+    }
+
+    function isMoveCompatible(sourceTag, targetTag) {
+        if (targetTag.html() != '.') return false;
+        var sourceArr = sourceTag.attr('id').split('_');
+        var targetArr = targetTag.attr('id').split('_');
+        if ((sourceArr[0] != targetArr[0]) || (sourceArr[1] != targetArr[1]) || (sourceArr[9] != targetArr[9])) return false;
+        if (sourceArr[7] == targetArr[7]) return false;
+
+        var liIdList = getLiIdList(sourceArr[0], sourceArr[1]);
+
+        var sourceIndex = parseInt(sourceArr[7]);
+        var targetIndex = parseInt(targetArr[7]);
+        var startIndex = sourceIndex;
+        var endIndex = targetIndex;
+        if (startIndex > endIndex) {
+             startIndex = targetIndex;
+             endIndex = sourceIndex;
+        }
+
+        for (var i = startIndex + 1; i < endIndex; i++) {
+             if ($('#' + liIdList[i]).html() != '.') return false;
+        }
+
+        return true;
     }
 
     function loadSortable() {
@@ -761,10 +757,12 @@ $(document).ready(function() {
                     addClasses: false,
                     drop: function(event, ui) {
                         var $this = $(this);
+                        if (!isMoveCompatible(ui.draggable, $this)) return false;
                         $.ajax({
                             url: seqMovURL,
                             data: {
                                 "sessionid": sessionID,
+                                "identifier": identifier,
                                 "operation": "move",
                                 "aligntag": alignTagVal,
                                 "source": ui.draggable.attr('id'),
@@ -777,20 +775,22 @@ $(document).ready(function() {
                                     if (debugFlag) {
                                         alert(jsonOBJ.debug);
                                     }
-                                    $.each(jsonOBJ.editlist, function(i, key) {
-                                        $('#' + i).html(key.val).removeClass(key.classRemove).addClass(key.classAdd)
-                                            .bt(key.tooltip, toolTipConfig).attr('id', key.newid).attr('rel', key.val3);
-                                        seqEditOpId = key.editopid;
-                                        seqEditType = key.edittype;
-                                        if (seqEditOpId != 0) {
-                                            $('#undo').show();
-                                        } else {
-                                            $('#undo').hide();
-                                        }
-                                    });
-                                    $('#feedback').html(infoStyle + 'You moved: ' + $this.html() +
-                                        ' from position: ' + ui.draggable.attr('id').split('_')[7] +
-                                        ' to position: ' + $this.attr('id').split('_')[7]).show().delay(30000).slideUp(800);
+                                    if (!jsonOBJ.errorflag) {
+                                        $.each(jsonOBJ.editlist, function(i, key) {
+                                            $('#' + i).html(key.val).removeClass(key.classRemove).addClass(key.classAdd)
+                                                .bt(key.tooltip, toolTipConfig).attr('id', key.newid).attr('rel', key.val3);
+                                            seqEditOpId = key.editopid;
+                                            seqEditType = key.edittype;
+                                            if (seqEditOpId != 0) {
+                                                $('#undo').show();
+                                            } else {
+                                                $('#undo').hide();
+                                            }
+                                        });
+                                        $('#feedback').html(infoStyle + 'You moved: ' + $this.html() +
+                                            ' from position: ' + ui.draggable.attr('id').split('_')[7] +
+                                            ' to position: ' + $this.attr('id').split('_')[7]).show().delay(30000).slideUp(800);
+                                    }
                                 } catch (err) {
                                     $('.errmsg').html(errStyle + 'Error: ' + JSON.stringify(jsonOBJ) + '<br />\n' + adminContact)
                                         .show().delay(3000).slideUp(800);
@@ -979,30 +979,144 @@ $(document).ready(function() {
             $('#view3d').attr("disabled", true);
         }
     });
-    $('#makeglobaledit').click(function() {
-        $.ajax({
-            url: globalformURL,
-            data: {
-                "sessionid": sessionID,
-                "selectedids": globalSelectedIds,
-                "operation": "global_edit_form",
-                "aligntag": alignTagVal
+
+    function checkGlobalEditingFormValue() {
+        clearSelection();
+        var foundValue = false;
+        var errorMessage = '';
+        var chainIdList = $('#chainids').val().split(',');
+        for (var i = 0; i < chainIdList.length; i++) {
+             var start_position = $('#start_position_' + chainIdList[i]).val().trim();
+             var end_position = $('#end_position_' + chainIdList[i]).val().trim();
+             var move_to_position = $('#move_to_' + chainIdList[i]).val().trim();
+             if ((start_position == '') && (end_position == '') && (move_to_position == '')) continue;
+
+             foundValue = true;
+
+             if (start_position == '') errorMessage += "Missing 'start position' for chain '" + chainIdList[i] + "'.<br/>\n";
+             if (end_position == '') errorMessage += "Missing 'end position' for chain '" + chainIdList[i] + "'.<br/>\n";
+             if (move_to_position == '') errorMessage += "Missing 'move to position' for chain '" + chainIdList[i] + "'.<br/>\n";
+             if ((start_position == '') || (end_position == '') || (move_to_position == '')) continue;
+
+             var liIdList = getLiIdList("xyz", chainIdList[i]);
+
+             var foundError = false;
+             var start = parseInt(start_position);
+             if (start.toString() != start_position) {
+                  errorMessage += "The 'start position " + start_position + "' is not an integer.<br/>\n";
+                  foundError = true;
+             } else if ((start < 1) || (start > liIdList.length)) {
+                  errorMessage += "The 'start position " + start_position + "' is out of range.<br/>\n";
+                  foundError = true;
+             }
+
+             var end = parseInt(end_position);
+             if (end.toString() != end_position) {
+                  errorMessage += "The 'end position " + end_position + "' is not an integer.<br/>\n";
+                  foundError = true;
+             } else if ((end < 1) || (end > liIdList.length)) {
+                  errorMessage += "The 'end position " + end_position + "' is out of range.<br/>\n";
+                  foundError = true;
+             }
+
+             var target = parseInt(move_to_position);
+             if (target.toString() != move_to_position) {
+                  errorMessage += "The 'move to position " + move_to_position + "' is not an integer.<br/>\n";
+                  foundError = true;
+             } else if ((target < 1) || (target > liIdList.length)) {
+                  errorMessage += "The 'move to position " + move_to_position + "' is out of range.<br/>\n";
+                  foundError = true;
+             }
+             if (foundError) continue;
+
+             if (start > end) {
+                  start = parseInt(end_position);
+                  end = parseInt(start_position);
+             }
+
+             for (var j = start; j <= end; j++) $('#' + liIdList[j - 1]).addClass("ui-selected");
+             $('#' + liIdList[target - 1]).addClass("ui-selected");
+             $('#clearselect').attr("disabled", false).show();
+
+             var foundResidue = false;
+             if (target < start) {
+                  for (var j = target + 1; j < start - 1; j++) {
+                       if ($('#' + liIdList[j - 1]).html() != '.') {
+                            foundResidue = true;
+                            break;
+                       }
+                  }
+             } else if (target > end) {
+                  for (var j = end + 1; j < target - 1; j++) {
+                       if ($('#' + liIdList[j - 1]).html() != '.') {
+                            foundResidue = true;
+                            break;
+                       }
+                  }
+             } else {
+                  errorMessage += "The 'move to position " + move_to_position + "' is in middle of 'start position " + start_position
+                                + "' and 'end position " + end_position + "' for chain '" + chainIdList[i] + "'.<br/>\n";
+             }
+             if (foundResidue) {
+                  errorMessage += "The fragment between positions ( " + start.toString() + ", " + end.toString() + " ) can not be moved to position '"
+                                + target.toString() + "' for chain '" + chainIdList[i] + "'.<br/>\n";
+             }
+        }
+        if (errorMessage != '') {
+             $('#warningmessage').html(errorMessage).dialog("open");
+             return false;
+        } else if (!foundValue) {
+             $('#warningmessage').html("No input values.<br/>\n").dialog("open");
+             return false;
+        }
+
+        return true;
+    }
+
+    $('#makeblockedit').click(function() {
+        $('#globalfrm').toggle("slow");
+    });
+
+    $("#globalfrm_display").click(function() {
+        checkGlobalEditingFormValue();
+    });
+
+    $("#globalfrm_submit").click(function() {
+        if (!checkGlobalEditingFormValue()) return false;
+
+        $("#globalfrm").ajaxSubmit({
+            url: globaleditURL,
+            dataType: 'json',
+            beforeSubmit: function (arr, $form, options) {
+                progressStart();
             },
-            success: function(jsonOBJ) {
-                try {
-                    $('#globaldialog').html(jsonOBJ.htmlcontent);
-                    $('.errmsg').hide();
-                    $('.warnmsg').hide();
-                    $('#globaldialog').dialog("open");
-                    $('#makeglobaledit').attr("disabled", true);
-                    conflictform();
-                } catch (err) {
-                    $('.errmsg').html(errStyle + 'Error: ' + JSON.stringify(jsonOBJ) + '<br />\n' +
-                        adminContact).show().delay(3000).slideUp(800);
+            success: function (jsonObj) {
+                progressEnd();
+                if (!jsonObj.errorflag) {
+                    $.each(jsonObj.editlist, function(i, key) {
+                        $('#' + i).removeClass("ui-selected ui-selectee");
+                        $('#' + i).html(key.val).removeClass(key.classRemove).addClass(key.classAdd)
+                            .bt(key.tooltip, toolTipConfig).attr('id', key.newid).attr('rel', key.val3);
+                        seqEditOpId = key.editopid;
+                        seqEditType = key.edittype;
+                        if (seqEditOpId != 0) {
+                            $('#undo').show();
+                        } else {
+                            $('#undo').hide();
+                        }
+                    });
+                } else {
+                     $('#warningmessage').html(jsonObj.errortext).dialog("open");
                 }
+            },
+            error: function (data, status, e) {
+                progressEnd();
+                alert(e);
+                return false;
             }
         });
     });
+
     $('#predefgedit').click(function() {
         if ($('#gedittype option:selected').val() == 'no-mismatch') {
             $('.errmsg').html(errStyle + "Please select 'MisMatch' type.<br />\n").show().delay(5000).slideUp(800);
@@ -1054,6 +1168,7 @@ $(document).ready(function() {
                 adminContact).show().delay(5000).slideUp(800);
         }
     });
+
     $('#undo').click(function() {
         $.ajax({
             url: undoEditURL,

@@ -947,11 +947,13 @@ $(document).ready(function() {
 				  beforeSubmit: function (formData, jqForm, options) {
 				      formData.push({"name": "selectids", "value": selectIds}, {"name": "sessionid", "value": sessionID});
 				      $('#saveselect').hide();
+/*
 				      if (groupIdList.length == 1) {
 					  $('.errmsg').html(infoStyle + "Entity " + groupIdList.toString() + " has not been visited." ).show();
 				      } else if ( groupIdList.length > 1) {
 					  $('.errmsg').html(infoStyle + "Entities " + groupIdList.toString() + " have not been visited." ).show();
 				      }
+*/
 			              progressStart('Saving ...');
 				  },
 				  success: function (jsonOBJ, statusText) {
