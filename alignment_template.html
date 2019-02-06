@@ -40,10 +40,10 @@
       <input type="button" id="predefgedit" name="predefgedit" value="Change" class="displaynone" />
       </span>
       <span class="dashedborder fltlft">
-          <input type="button" id="makeblockedit" name="makeblockedit" value="Make Block Move" class="displaynone" />
           <input type="button" id="activate_shift" name="activate_shift" value="Activate Move" class="displaynone" />
       </span>
       <input type="button" id="deleteselect" name="deleteselect" value="Mark for Deletion" class="displaynone fltlft" />
+      <input type="button" id="makeglobaledit" name="makeglobaledit" value="Make Global Edit" class="displaynone fltlft" />
       <input type="button" id="clearselect" name="clearselect" value="Clear Selection" class="displaynone fltlft" />
       <input type="button" id="undo" name="undo" value="Undo" class="displaynone fltlft" />
       <input type="button" id="go" name="go" value="Save Alignment" class="displaynone fltrgt" />
@@ -56,19 +56,12 @@
     <div class="errmsg ui-state-error ui-corner-all"></div>
     <div id="feedback" class="ui-state-highlight ui-corner-all displaynone"></div>
 
-    <form name="globalfrm" id="globalfrm" class="displaynone">
-        <div id="blockeditdialog"></div>
-        <br class="clearfloat" />
-        <input type="button" id="globalfrm_display" value="Check & Display Selection(s)" class="fltlft" />
-        <input type="button" id="globalfrm_submit" value="Move" class="fltrgt" />
-        <br class="clearfloat" />
-    </form>
-   
     <br class="clearfloat" />
     <div id="result"></div>
     <div id="tableview"></div>
     <br class="clearfloat" />
     <div id="molviewer" title="3D Viewer"></div>
+    <div id="globaldialog" title="Change Selected Values"></div>
     <div id="warningmessage" title="Warning Messages"></div>
     <br />
     <div class="ui-state-highlight ui-corner-all noprint">

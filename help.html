@@ -29,8 +29,8 @@
 
         <div id="reload">
             <h4>"Re-load Summary" button:</h4>
-            <p>Save current selections and annotations and re-display the summary page. Use this option to display new sequence versions arising
-               from edits in the alignment view. 
+            <p>Save current selections and annotations and redisplay the summary page.  Use this option to display new sequence versions arrising
+               from edits in the alignment view.
                  <b>Always reload the the summary view and check selections before saving assignments and quitting.</b> </p>
         </div>
 
@@ -41,66 +41,60 @@
 
         <div id="save">
           <h4>"Save Assignments" button:</h4>
-          <p>Saves current selections and annotation results in an assignment file and merges these assignments into the current model file. Please 
-             also note that upon clicking "Save Assignments" button, the saved in-progress sequence annotation is also removed by default.</p> 
+          <p>Saves current selections and annotation results in an assignment file and the merges these assignments into the current model file.</p>
 	</div>   
 
 	<div>
           <h4>"Quit for now" button:</h4>
           <p>End the current session without updating assignment and model files in the archive directory. </p>
-          <p>This option will save current selections and annotation if the module is re-opened. Use this button if you want to go home now 
-             and resume sequence annotation immediately tomorrow.</p>
+	  <p>This option will save current selections that will be reused if the module is restarted from the workflow manager UI interface.</p>
 	</div>
         
 	<div>
 	  <h4>"All Done" button:</h4>
           <p>End the current session and update the archive with any save assignments.</p>
-	  <p>This option does not save assignments or create a new model file. You must click on the "Save Assignments" button to do so.</p>
+	  <p>This option does not save assignments or create a new model file. You must click on the "Save" button to do so.</p>
 	</div>
 
 	<div>
           <h4>"Save in-progress sequence annotation to archive" button:</h4>
-          <p>This option will save the current selections and annotation into archive directory. The saved information will be reused if 
-             sequence module is re-started from the work flow manager. Use this button if you want to save current sequence annotation, but 
-             also need to update model file (through other modules or editor), and then re-run sequence module to finish sequence assignment.</p>
+	  <p>This option will save current selections into archive directory. The saved information will be reused if a new sequence workflow is started from the workflow manager.</p>
 	</div>
 
 	<div>
           <h4>"Remove in-progress sequence annotation from archive" button:</h4>
-          <p>This option will remove the saved current selections from archive directory. Please also note that upon clicking 
-             "Save Assignments" button, the saved in-progress sequence annotation is also removed by default.</p>
+	  <p>This option will remove the saved current selections from archive directory.</p>
 	</div>
 
     	<div id="select">
             <h4>"SELECT" check-box:</h4>
-            <p>Select the sequence and the associated annotations for export. Data for selected sequences are stored in the sequence 
-               assignment file upon pressing the "Save Assignments" button.</p>
+            <p>Selects this the sequence and the associated annotations for export.  Data for selected sequences are stored in the 
+               sequence assignment file  upon pressing the "Save assignments" button.</p>
         </div>
         
 	<div id="alignall">
           <h4>"ALIGN ALL" check-box:</h4>
-          <p> Select all sequences in the group for alignment.</p>
+          <p> Selects all sequences in the group for alignment.</p>
         </div>
 
     	<div id="tax">
             <h4>"Edit Sequence/Partition/Taxonomy Source" button:</h4>
             <p>Displays an input form with options to edit taxonomy and applicable residue ranges for the entity.</p>
-            <p>An alternative one-letter code sequence with modified residue in parenthesis may be entered for the entity sequence. 
-               Alignment will be re-generated upon submitting the new sequence. It is the most convenient way to add tags at the termini.</p>
-            <p>For chimera protein, please split the sequence by absolute range and provide appropriate source tax id.</p>
-            <p>An option of "Add instances from entity" at the bottom is provided to consolidate all of the instances from another entity 
-               into the current entity. The entity without instances is effectively deleted and will not appear in the updated model file.</p>
+            <p>An alternative one-letter code sequence with parenthetical modifications may be entered for the entity sequence.  </p>
+            <p>An option is provided to consolidate all of the instances from another entity into the current entity.  
+                The entity without instances is effectively deleted and will not appear in the updated model file.  </p>
+
 	    <p>A new reference sequence database search may optionally follow taxonomy and partition changes.</p>            
         </div>
 
     	<div id="edentity">
             <h4>"Edit Source Details" button:</h4>
-            <p>Displays an input form with options to edit various entity and source annotations.</p>
+            <p>Displays an input form with options to edit various enity and source annotations</p>
         </div>
 
     	<div id="loadref">
             <h4>"Load Reference Sequence" button:</h4>
-            <p>Displays an input form with options to input a new reference sequence or edit the related residue range (in UNP/GB number).</p>
+            <p>Displays an input form with options to input a new reference sequence or edit the related residue range</p>
         </div>
 
 	<!-- 
@@ -115,7 +109,6 @@
             results by ascending/descending order of values in the given column.</p>
         </div>
 	-->
-        </div>
 
 	<div id="alignment">
     	  <div class="fltrgt">
@@ -130,25 +123,22 @@
         </div>
 	<div id="moveresidue">
             <h4>To move/shift a single residue:</h4>
-            Click on 'Activate Move' button + left-click on residue, then shift the residue to a new position<br />
+            Click on 'Activate Move' button + left-click on residue, then shift the residue to an adjacent position<br />
         </div>
 
         <div id="deleteresidue">
         	<h4>To delete residue(s):</h4>
-            <ol><li>Single residue:<br />
-                     a). Double click on residue, then edit in place by backspace to clear the letter symbol<br />
-                     b). Left-click on a single residue and drag cursor over just that residue, then click on "Mark for Deletion" to 
-                         highlight the residue in purple. The residue will be highlighted in purple. Then click "Save Alignment" on 
-                         alignment page to realize the deletion.</li>
-                <li>Range of residues:<br />
-                        Left-click on single residue and drag cursor over range of adjacent residues, releasing left mouse button 
-                        when done highlighting the desired range. Then click on "Mark for Deletion" which will highlight the residues in purple. 
-                        Then click "Save Alignment" on alignment page to realize the deletion.</li>
-            </ol>
+            <ol><li>Single residue<br />
+				a). Use [SHIFT] + left-click on residue, then edit in place by backspace to clear the letter symbol<br />
+				b). Left-click on a single residue and drag cursor over just that residue, then click on "Mark for Deletion" to  highlight the residue in purple.</li>
+			<li>Range of residues:<br />
+			Left-click on single residue and drag cursor over range of adjacent residues, releasing left mouse button when done highlighting the desired range. Then click on "Mark for Deletion" which will highlight the residues in purple.</li>
+			</ol>
         </div>
         <div id="commitedits">
         	<h4>To commit edits:</h4>
-            <p>Click on "Save Alignment" button in order to commit any edits to an output file, which will create a new version of the output file.</p>
+            <p>Click on "Save Alignment" button in order to commit any edits to an output file.<br />
+			Successive clicks on "Save Alignment" button creates a new version of the output file.</p>
         </div>
         <div id="undoedits">
                 <h4>To incrementally undo any edits:</h4>
