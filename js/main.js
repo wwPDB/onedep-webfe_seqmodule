@@ -27,6 +27,7 @@ edit operations and also saves the alignment.
 *********************************************************************/
 var updateFlag;
 var alignBlockList = [];
+var missingAuthSeqMap = {};
 
 function iframeCloserX() {
 
@@ -314,6 +315,7 @@ $(document).ready(function() {
                             if ("alignids" in resOBJ) alignIds = resOBJ.alignids;
                             if ("selectids" in resOBJ) selectIds = resOBJ.selectids;
                             if ("alignmentblocklist" in resOBJ) alignBlockList = resOBJ.alignmentblocklist.split(",");
+                            if ("missingauthseqmap" in resOBJ) missingAuthSeqMap = resOBJ.missingauthseqmap;
                             if (resOBJ.conflictreportflag) {
                                 $('#tableview').load(resOBJ.conflictreportpath);
                             } else {
@@ -463,7 +465,10 @@ $(document).ready(function() {
                         retval = value;
                         priorValue = $(this).attr('rel');
                     } else {
-                        retval = value;
+                        var idArr = $(this).attr('id').split("_");
+                        if ((value == '.') && (idArr[0] == 'auth') && (idArr[7] in missingAuthSeqMap))
+                             retval = missingAuthSeqMap[idArr[7]];
+                        else retval = value;
                         priorValue = value;
                     }
                 }
