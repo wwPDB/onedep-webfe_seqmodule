@@ -565,6 +565,78 @@ function ValidateFormTaxonomy() {
 				}
 			    }
 			});
+                        $('#add_row_button').click(function() {
+                            var selectvalues = '[{"value":"","label":"","selected":false},{"value":"Biological sequence","label":"Biological sequence","selected":false}]';
+                            var int_total_numparts = parseInt($('#total_numparts').val());
+
+                            var additional_row_text = "";
+                            var tagIdList = [];
+                            for (var i = 0; i < 5; ++i) {
+                                 int_total_numparts++;
+                                 var partId = int_total_numparts.toString();
+                                 additional_row_text += '<tr>\n';
+                                 additional_row_text += '<td><span id="p_' + partId + '_partid">' + partId + '</span>'
+                                                      + '<input type="hidden" name="p_' + partId + '_partid" value="' + partId + '" /></td>\n';
+                                 additional_row_text += '<td><span id="p_' + partId + '_taxid">click-to-edit</span></td>\n';
+                                 additional_row_text += '<td><span id="p_' + partId + '_seqbegin">click-to-edit</span>\n';
+                                 additional_row_text += '<td><span id="p_' + partId + '_seqend">click-to-edit</span></td>\n';
+                                 additional_row_text += '<td><span id="p_' + partId + '_seqtype" data-ief-edittype="select" data-ief-selectvalues=\''
+                                                      + selectvalues + '\'>click-to-edit</span></td>\n';
+                                 additional_row_text += '</tr>\\n';
+                                 tagIdList.push('p_' + partId + '_taxid');
+                                 tagIdList.push('p_' + partId + '_seqbegin');
+                                 tagIdList.push('p_' + partId + '_seqend');
+                                 tagIdList.push('p_' + partId + '_seqtype');
+                            }
+                            $('#seq_partition_table').append(additional_row_text);
+
+                            for (var i = 0; i < tagIdList.length; ++i) {
+                                 $('#' + tagIdList[i]).addClass('ief');
+                                 $('#' + tagIdList[i]).addClass('greyedout');
+                                 $('#' + tagIdList[i]).ief({
+                                      onstart:function(){
+                                          if ($(this).hasClass('greyedout')){
+                                              $(this).data('placeholder',$(this).html()).empty();
+                                          }
+                                      },
+                                      oncommit:function(){
+                                          var id = $(this).attr('id');
+                                          var idsplit = id.split('_');
+                                          var checkid = '';
+                                          if (idsplit[2] == 'seqbegin') checkid = idsplit[0] + '_' + idsplit[1] + '_seqend';
+                                          else if (idsplit[2] == 'seqend') checkid = idsplit[0] + '_' + idsplit[1] + '_seqbegin';
+                                          if (checkid != '') {
+                                              var check_val = $('#' + checkid).text();
+                                              var seqtype_id = idsplit[0] + '_' + idsplit[1] + '_seqtype';
+                                              if (!$(this).is(":empty") && check_val != '' && check_val != "click-to-edit") {
+                                                  UpdateSeqType(seqtype_id, "Biological sequence", true);
+                                              } else if ($(this).is(":empty") && ((check_val == '') || (check_val == "click-to-edit"))) {
+                                                  UpdateSeqType(seqtype_id, "Biological sequence", false);
+                                                  var taxid = idsplit[0] + '_' + idsplit[1] + '_taxid';
+                                                  $('#' + taxid).data('placeholder',$('#' + taxid).html()).empty();
+                                                  $('#' + taxid).html(placeholderVal).addClass('greyedout');
+                                              }
+                                          }
+                                          // New filtering blank form elements --
+                                          if ($.trim($(this).html()).length == 0) {
+                                              $(this).data('placeholder',$(this).html()).empty();
+                                              $(this).html(placeholderVal).addClass('greyedout');
+                                          } else if ($(this).hasClass('greyedout') && !$(this).is(":empty")){
+                                              $(this).removeClass('greyedout');
+                                          } else if ($(this).hasClass('greyedout')) {
+                                              $(this).html($(this).data('placeholder')).addClass('greyedout');
+                                          }
+                                      },
+                                      oncancel:function(){
+                                          if ($(this).is(":empty")){
+                                              $(this).html($(this).data('placeholder')).addClass('greyedout');
+                                          }
+                                      }
+                                 });
+                            }
+                            $('#seq_partition_table').show();
+                            $('#total_numparts').val(int_total_numparts.toString());
+                        });
 		    });
 		});
 		$('.loadentityreview').click(function(){

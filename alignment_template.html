@@ -41,6 +41,7 @@
       </span>
       <span class="dashedborder fltlft">
           <input type="button" id="makeblockedit" name="makeblockedit" value="Make Block Move" class="displaynone" />
+          <input type="button" id="repopulate_deletions" name="repopulate_deletions" value="Update Block Auth. Seq." class="displaynone" />
           <input type="button" id="activate_shift" name="activate_shift" value="Activate Move" class="displaynone" />
       </span>
       <input type="button" id="deleteselect" name="deleteselect" value="Mark for Deletion" class="displaynone fltlft" />
@@ -62,6 +63,10 @@
         <input type="button" id="globalfrm_display" value="Check & Display Selection(s)" class="fltlft" />
         <input type="button" id="globalfrm_submit" value="Move" class="fltrgt" />
         <br class="clearfloat" />
+    </form>
+
+    <form name="globalpopulatefrm" id="globalpopulatefrm" class="displaynone">
+        <div id="globalpopulatedialog"></div>
     </form>
    
     <br class="clearfloat" />

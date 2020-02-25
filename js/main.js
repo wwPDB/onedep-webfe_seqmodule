@@ -93,6 +93,7 @@ $(document).ready(function() {
     var astexURL = "/service/sequence_editor/molviewer/astexviewer";
     var globalmenuURL = "/service/sequence_editor/global_edit_menu";
     var globaleditURL = "/service/sequence_editor/global_edit";
+    var globalAuthSeqEditURL = "/service/sequence_editor/global_auth_seq_edit";
     var seqEditOpId = 0;
     var seqEditType = 0;
     var alignTagVal = "";
@@ -257,7 +258,7 @@ $(document).ready(function() {
                 "activegroupid": activeGroupId,
                 "BIGBUGS": "MYBUGS"
             };
-            $("#go, #deleteselect, #clearselect, #view3d, #viewer, #makeblockedit, #closewindow, " +
+            $("#go, #deleteselect, #clearselect, #view3d, #viewer, #makeblockedit, #repopulate_deletions, #closewindow, " +
                 "#undo, #feedback, #predefgedit, #activate_shift, #gedittype, .errmsg .warnmsg").hide();
             $('#result, #tableview').html('');
             updateFlag = 'yes';
@@ -330,7 +331,17 @@ $(document).ready(function() {
 
                             if ("blockedithtml" in resOBJ) {
                                 $('#blockeditdialog').html(resOBJ.blockedithtml);
+                                $('#makeblockedit').show();
                             }
+
+                            if ("repdelhtml" in resOBJ) {
+                                $('#globalpopulatedialog').html(resOBJ.repdelhtml);
+                                $('#repopulate_deletions').show();
+                            }
+
+                            $('.submit_populatefrm').click(function() {
+                                submit_globalpopulatefrm($(this).attr("id"));
+                            });
 
                             if ("htmlcontentpath" in resOBJ) {
                                 $('#result').load(resOBJ.htmlcontentpath, function() {
@@ -354,7 +365,7 @@ $(document).ready(function() {
                                 $('#result').html('<p></p>');
                             }
                             alignTagVal = resOBJ.aligntag;
-                            $('#go, #view3d, #viewer, #predefgedit, #activate_shift, #makeblockedit, #gedittype, #closewindow').show();
+                            $('#go, #view3d, #viewer, #predefgedit, #activate_shift, #gedittype, #closewindow').show();
                             $('#view3d, #viewer').attr("disabled", false);
                             $('#undo').hide();
                             if (debugFlag) {
@@ -1121,6 +1132,100 @@ $(document).ready(function() {
             }
         });
     });
+
+    $('#repopulate_deletions').click(function() {
+        $('#globalpopulatefrm').toggle("slow");
+    });
+
+    function checkGlobalPopulateFormValue(blockId) {
+        var blockList = [];
+
+        if (blockId == "all") {
+            var repblocknum = parseInt($("#repblocknum").val());
+            for (var i = 0; i < repblocknum; ++i) {
+                blockList.push(i);
+            }
+        } else blockList.push(parseInt(blockId));
+
+        var errmsg = "";
+        for (var i = 0; i < blockList.length; ++i) {
+             var start = $("#repstartposition_" + blockList[i]).val();
+             var end = $("#rependposition_" + blockList[i]).val();
+
+             var block_errmsg = "";
+             if ((start == "") && (end == "")) block_errmsg = "missing start & end position values.";
+             else if (start == "") block_errmsg = "missing start position value.";
+             else if (end == "") block_errmsg = "missing end position value.";
+             if (block_errmsg != "") {
+                 if (errmsg != "") errmsg += "\n";
+                 errmsg += "Block="+(blockList[i]+1) + ": " + block_errmsg;
+                 continue;
+             }
+             if (parseInt(start) > parseInt(end)) {
+                 if (errmsg != "") errmsg += "\n";
+                 errmsg += "Block="+(blockList[i]+1) + ": start position value '" + start + "' > end position value '" + end + "'.";
+                 continue;
+             }
+             var lower_boundary = $("#actual_repstartposition_" + blockList[i]).val();
+             var upper_boundary = $("#actual_rependposition_" + blockList[i]).val();
+             var boundary_errmsg = "";
+             if (((parseInt(start) < parseInt(lower_boundary)) || (parseInt(start) > parseInt(upper_boundary))) &&
+                 ((parseInt(end) < parseInt(lower_boundary)) || (parseInt(end) > parseInt(upper_boundary))))
+                 boundary_errmsg = "start position value '" + start + "' & end position value '" + end + "' are out of the range [ " 
+                                 + lower_boundary + ", " + upper_boundary + " ].";
+             else if ((parseInt(start) < parseInt(lower_boundary)) || (parseInt(start) > parseInt(upper_boundary)))
+                 boundary_errmsg = "start position value '" + start + "' is out of the range [ " + lower_boundary + ", " + upper_boundary + " ].";
+             else if ((parseInt(end) < parseInt(lower_boundary)) || (parseInt(end) > parseInt(upper_boundary)))
+                 boundary_errmsg = "end position value '" + end + "' is out of the range [ " + lower_boundary + ", " + upper_boundary + " ].";
+             if (boundary_errmsg != "") {
+                 if (errmsg != "") errmsg += "\n";
+                 errmsg += "Block="+(blockList[i]+1) + ": " + boundary_errmsg;
+             }
+        }
+        if (errmsg != "") {
+            alert(errmsg);
+            return false;
+        }
+        return true;
+    }
+
+    function submit_globalpopulatefrm(button_id) {
+        var tmpArray = button_id.split("_");
+        if (!checkGlobalPopulateFormValue(tmpArray[1])) return false;
+
+        $("#globalpopulatefrm").ajaxSubmit({
+            url: globalAuthSeqEditURL,
+            dataType: "json",
+            beforeSubmit: function (formData, $form, options) {
+                formData.push({name:"blockid",value:tmpArray[1]});
+                progressStart();
+            },
+            success: function (jsonObj) {
+                progressEnd();
+                if (!jsonObj.errorflag) {
+                    $.each(jsonObj.editlist, function(i, key) {
+                        $("#" + i).removeClass("ui-selected ui-selectee");
+                        $("#" + i).html(key.val).removeClass(key.classRemove).addClass(key.classAdd)
+                            .bt(key.tooltip, toolTipConfig).attr("id", key.newid).attr("rel", key.val3);
+                        seqEditOpId = key.editopid;
+                        seqEditType = key.edittype;
+                        if (seqEditOpId != 0) {
+                            $("#undo").show();
+                        } else {
+                            $("#undo").hide();
+                        }
+                    });
+                } else {
+                     $("#warningmessage").html(jsonObj.errortext).dialog("open");
+                }
+            },
+            error: function (data, status, e) {
+                progressEnd();
+                alert(e);
+                return false;
+            }
+        });
+    }
 
     $('#predefgedit').click(function() {
         if ($('#gedittype option:selected').val() == 'no-mismatch') {
