@@ -259,7 +259,7 @@ $(document).ready(function() {
                 "BIGBUGS": "MYBUGS"
             };
             $("#go, #deleteselect, #clearselect, #view3d, #viewer, #makeblockedit, #repopulate_deletions, #closewindow, " +
-                "#undo, #feedback, #predefgedit, #activate_shift, #gedittype, .errmsg .warnmsg").hide();
+              "#globalpopulatefrm, #undo, #feedback, #predefgedit, #activate_shift, #gedittype, .errmsg .warnmsg").hide();
             $('#result, #tableview').html('');
             updateFlag = 'yes';
         } else {
