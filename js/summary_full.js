@@ -537,8 +537,10 @@ function ValidateFormTaxonomy() {
 			});
 			$('.taxonomy_ajaxform').ajaxForm({
 			    beforeSubmit: function (formData, jqForm, options) {
+			        progressStart('Saving Edits ...');
                                 var error = ValidateFormTaxonomy();
                                 if (error != '') {
+				    progressEnd();
                                     alert(error);
                                     return false;
                                 }
@@ -546,7 +548,6 @@ function ValidateFormTaxonomy() {
 				formData.push({name:'selectids',value:selectIds});
 				//$('#dialogloadnewform').dialog("close");
 				$('#dialogtaxonomyform').dialog("close");
-				progressStart('');
 			    },
 			    success: function (jsonOBJ) {
 				if (jsonOBJ.statuscode=='ok') {
