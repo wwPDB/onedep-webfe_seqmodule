@@ -382,7 +382,7 @@ function ValidateFormTaxonomy() {
 		$('#pagi').paginate({count: $('.tabscount').size(),
 				     start: activeGroupID,
 				     activegroupid: activeGroupID,
-				     display:10,
+				     display:30,
 				     border:true,
 				     border_color:'#BEF8B8',
 				     text_color:'#68BA64',
