@@ -1039,6 +1039,7 @@ $(document).ready(function() {
 					      $('.errmsg').append('<br />' + infoStyle + 'Selection saved.').show();
 					      $('#saveselect').hide();
 					      $('#downloadlink').show();
+                                              $('#closecompleted').attr("disabled", false);
 				      }
 			              if (jsonOBJ.warningflag) {
 				     	      $('#warningmessage').html(jsonOBJ.warningtext).dialog("open");
