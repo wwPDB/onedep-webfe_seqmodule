@@ -33,6 +33,12 @@ input[type=text], .inputbox{font:10px "Courier New",Courier,monospace; backgroun
 .uniprotseq, .coorseq, .authorseq, .placeholder{float:left; width:15%}
 .legendcount{text-align:right}
 .head{display:block; width:98%; text-decoration:none; font-weight:bold; border:#CCC 1px solid; padding:1% 5px; margin:5px 0}
+.summary_control{display:none; width:100px; text-decoration:none; font-weight:bold; border:#CCC 1px solid; padding:2px; margin:2px 0}
+.summary_display{display:none;}
+.summary_display table.summary_table .odd {background-color: #E3F2E1}
+/*
+.summary_display{display:none; width:99%; text-decoration:none; font-weight:bold; border:#CCC 1px solid; padding:1% 5px; margin:5px 0}
+*/
 .inneraccordion table td:last-child{width:30%; text-align:left}
 .inneraccordion table.tablesorter_ref .odd, inneraccordion table.tablesorter_xyz .odd {background-color: #E3F2E1}
 .inneraccordion table.tablesorter_ref .header, .inneraccordion table.tablesorter_xyz .header {background: #696 url(/seqmodule/images/updown.gif) no-repeat right center; cursor:pointer; padding-right:15px}

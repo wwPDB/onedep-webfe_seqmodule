@@ -95,6 +95,8 @@ function doReloadSummary(updatedSelectIds) {
     resetBtns();
     $('.errmsg').empty().hide();
     $('.warnmsg').empty().hide();
+    $('.summary_control').hide();
+    $('.summary_display').hide();
     $('#res').empty();
     $('#saveselect, #savepartial, #closecompleted, #closeunfinished,  #viewalignframebutton, #viewalign_ordering, #downloadlink').hide();
     $('#rerun, #reload, #polymerlinkage').hide();
@@ -341,6 +343,8 @@ function ValidateFormTaxonomy() {
 		sessionID = jsonOBJ.sessionid;
 		$('.errmsg').empty().hide();
                 $('.warnmsg').empty().hide();
+		$('.summary_control').hide();
+		$('.summary_display').hide();
 		if (debUG) {alert(sessionID);}
 		$('#go').val('Go').prop('disabled', false);
 	    } catch(err) {
@@ -360,6 +364,31 @@ function ValidateFormTaxonomy() {
             if ('entrywarningmessage' in jsonOBJ) {
                 $('.errmsg').html(infoStyle + jsonOBJ.entrywarningmessage).show();
             }
+            if ('summaryinfo' in jsonOBJ) {
+                $('.summary_display').html(jsonOBJ.summaryinfo);
+            }
+            $('.summary_control').show();
+            var elecontrol = $('#summary_toggle').find('span.ui-icon');
+            if (elecontrol.hasClass('ui-icon-circle-arrow-s')) {
+                $('.summary_display').show();
+            }
+            $('.page_control').click(function() {
+                var id = $(this).attr('id');
+                var page = id.substring(5);
+                $('._current').removeClass('_current').slideUp('slow');
+                $('#p'+page).addClass('_current').slideDown('slow');
+                activeGroupID = page;
+                if (groupIdListFlag) {
+                    groupIdList.splice($.inArray(activeGroupID, groupIdList),1);
+                }
+                resetBtns();
+/*
+                var ele1 = $('.toggle_summary').find('span.ui-icon');
+                ele1.removeClass('ui-icon-circle-arrow-s');
+                ele1.addClass('ui-icon-circle-arrow-e');
+                $('.summary_display').hide();
+*/
+            });
             entryIdentifier = jsonOBJ.identifier;
 	    //
 	    $('#identifier-sect').html("<b>Data set:</b> " + jsonOBJ.identifier + '<br/><b>Title:</b> ' + jsonOBJ.title).removeClass('displaynone');
@@ -844,10 +873,24 @@ function handleCLoseWindow() {
     });
 }
 
-
 $(document).ready(function() {
     //
     $.ajaxSetup({type:'POST',dataType:'JSON',async:true,timeout:ajaxTimeout,cache:false});
+
+    $('.toggle_summary').click(function() {
+        var ele = $(this).find('span.ui-icon');
+        if (ele.hasClass('ui-icon-circle-arrow-s')) {
+            ele.removeClass('ui-icon-circle-arrow-s');
+            ele.addClass('ui-icon-circle-arrow-e');
+            $('.summary_display').hide();
+        } else {
+            ele.removeClass('ui-icon-circle-arrow-e');
+            ele.addClass('ui-icon-circle-arrow-s');
+            $('.summary_display').show();
+        }
+        return false;
+    });
+
     $(document)
 	.ajaxStart(function() {$('.loading').show()})
 	.ajaxComplete(function() {$('.loading').hide()})
