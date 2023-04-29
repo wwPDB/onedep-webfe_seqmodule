@@ -35,6 +35,7 @@ the RCSB ID or by uploading the file.
 03-May-2016 ep  : Move "more sequences" button after the search results
 17-May-2016 ep  : showmore button changed from id to class to handle multiple entities
 13-Sep-2017 zf  : add UpdateSeqType(), ValidateFormTaxonomy()
+29-Apr-2023 ep  : add postJSON() method and use in place of getJSON for taxonomy load due to URI limits 
 #
 #
 *********************************************************************/
@@ -470,7 +471,7 @@ function ValidateFormTaxonomy() {
 
 		$('.loadseqdbref').click(function(){
 		    var refId=$(this).parent().prev().find('a').attr('id');
-		    $.getJSON(loadNewDbRef,{"sessionid":sessionID,"identifier":entryIdentifier,activegroupid:activeGroupID,"ref_id":refId,'selectids':selectIds},function(jsonOBJ){
+		    $.postJSON(loadNewDbRef,{"sessionid":sessionID,"identifier":entryIdentifier,activegroupid:activeGroupID,"ref_id":refId,'selectids':selectIds},function(jsonOBJ){
 			$('#dialogloadnewform').html(jsonOBJ.htmlcontent).dialog("open");
 			$('.ief').ief({
 			    onstart:function(){
@@ -521,7 +522,7 @@ function ValidateFormTaxonomy() {
 
 		$('.loadtaxonomy').click(function(){
 		    var authId=$(this).parent().prev().find('a').attr('id');
-		    $.getJSON(loadNewTaxonomy,{"sessionid":sessionID,activegroupid:activeGroupID,"auth_id":authId,'selectids':selectIds},function(jsonOBJ){
+		    $.postJSON(loadNewTaxonomy,{"sessionid":sessionID,activegroupid:activeGroupID,"auth_id":authId,'selectids':selectIds},function(jsonOBJ){
 			    // jdw$('#dialogloadnewform').html(jsonOBJ.htmlcontent).dialog("open");
 			    $('#dialogtaxonomyform').html(jsonOBJ.htmlcontent).dialog("open");
 			$('.ief').ief({
@@ -875,6 +876,13 @@ function handleCLoseWindow() {
 
 $(document).ready(function() {
     //
+    // Replacement for jquery.getJSON but uses post
+    $.postJSON = function(url, data, func)
+    {
+	$.post(url, data, func, "json");
+    }
+
+
     $.ajaxSetup({type:'POST',dataType:'JSON',async:true,timeout:ajaxTimeout,cache:false});
 
     $('.toggle_summary').click(function() {
