@@ -673,7 +673,7 @@ function ValidateFormTaxonomy() {
 		$('.loadentityreview').click(function(){
 		    $('#dialogloadnewform').on( "dialogclose", function () {$(".ui-widget-overlay").remove();});
 		    var authId=$(this).parent().prev().find('a').attr('id');
-		    $.getJSON(loadEntityReview,{"sessionid":sessionID,"groupid":activeGroupID,"auth_id":authId,'selectids':selectIds},function(jsonOBJ){
+		    $.postJSON(loadEntityReview,{"sessionid":sessionID,"groupid":activeGroupID,"auth_id":authId,'selectids':selectIds},function(jsonOBJ){
 			$('#dialogloadnewform').dialog({
 			    modal : true,
 			    resizable: true,
