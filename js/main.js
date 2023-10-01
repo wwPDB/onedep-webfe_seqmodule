@@ -1235,7 +1235,9 @@ $(document).ready(function() {
         var predefEditIds = '';
         $('.' + $('#gedittype option:selected').val()).each(function(i) {
             console.log("Global edit top selection is " + $(this).attr('id'));
-            if ($(this).attr('id').substr(0, 3) != 'aaa') {
+            if ($('#gedittype option:selected').val() == "cf-ala-unk") {
+                predefEditIds += ((predefEditIds.length > 0) ? "," : "") + $(this).attr('id') + '|' + $(this).html() + '|(UNK)|'+ $(this).attr('class');
+            } else if ($(this).attr('id').substr(0, 3) != 'aaa') {
                 var thisClass = $(this).attr('class').substr($(this).attr('class').indexOf('cf-rep-'), 10);
                 console.log("thisClass is " + thisClass);
                 predefEditIds += ((predefEditIds.length > 0) ? "," : "") + $(this).attr('id') + '|' +
