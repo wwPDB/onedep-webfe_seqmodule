@@ -34,8 +34,9 @@ the RCSB ID or by uploading the file.
 01-Feb-2015 jdw : shrink taxonomy form -
 03-May-2016 ep  : Move "more sequences" button after the search results
 17-May-2016 ep  : showmore button changed from id to class to handle multiple entities
-13-Sep-2017 zf  : add UpdateSeqType(), ValidateFormTaxonomy()
+13-Sep-2017 zf  : add ValidateFormTaxonomy()
 29-Apr-2023 ep  : add postJSON() method and use in place of getJSON for taxonomy load due to URI limits 
+05-Jan-2024 zf  : add addPartitonTableRows(), $('.seqbuilder_ajaxform').ajaxForm()
 #
 #
 *********************************************************************/
@@ -178,33 +179,6 @@ function closeWindow() {
     }
 }
 
-function UpdateSeqType(seqtype_id, value, selected) {
-    var label = placeholderVal;
-    var selectvalues = '';
-    $.each($('#' + seqtype_id).data('ief-selectvalues'), function(i, item) {
-        if (item.value == value) {
-            item.selected = selected;
-            if (selected) {
-                label = item.label;
-                $("select[name='" + seqtype_id + "'] option[value='" + value + "']").attr('selected','selected');
-                $("select[name='" + seqtype_id + "'] option[value='" + value + "']").prop('selected',true);
-            } else {
-                $("select[name='" + seqtype_id + "'] option[value='" + value + "']").removeAttr('selected');
-                $("select[name='" + seqtype_id + "'] option[value='" + value + "']").prop('selected', false);
-            }
-        }
-        if (selectvalues != '') selectvalues += ',';
-        var selected_value = 'false';
-        if (item.selected) selected_value = 'true';
-        selectvalues += '{"value":"' + item.value + '","label":"' + item.label + '","selected":' + selected_value + '}';
-    });
-    $('#' + seqtype_id).attr('data-ief-selectvalues', '[' + selectvalues + ']');
-    $('#' + seqtype_id).html(label);
-    if (selected)
-        $('#' + seqtype_id).removeClass('greyedout');
-    else $('#' + seqtype_id).addClass('greyedout');
-}
-
 function ValidateFormTaxonomy() {
     var seq = $('#formtaxonomy #entity_seq_1').text().toUpperCase().trim();
     var seqArray = [];
@@ -334,6 +308,27 @@ function ValidateFormTaxonomy() {
     return error;
 }
 
+function addPartitonTableRows(additional_rows) {
+    var int_total_numparts = parseInt($('#formtaxonomy #total_numparts').val());
+
+    var additional_row_text = "";
+    for (var i = 0; i < 5; ++i) {
+         int_total_numparts++;
+         var partId = int_total_numparts.toString();
+         additional_row_text += '<tr>\n';
+         additional_row_text += '<td>' + partId + '<input type="hidden" name="p_' + partId + '_partid" value="' + partId + '" /></td>\n';
+         additional_row_text += '<td><input type="text" id="p_' + partId + '_taxid" name="p_' + partId + '_taxid" value="" size="10" /></td>\n';
+         additional_row_text += '<td><input type="text" id="p_' + partId + '_seqbegin" name="p_' + partId + '_seqbegin" value="" size="10" /></td>\n';
+         additional_row_text += '<td><input type="text" id="p_' + partId + '_seqend" name="p_' + partId + '_seqend" value="" size="10" /></td>\n';
+         additional_row_text += '<td><select id="p_' + partId + '_seqtype" name="p_' + partId + '_seqtype">'
+                              + '<option value="" selected></option><option value="Biological sequence">Biological sequence</option></select></td>\n'
+         additional_row_text += '</tr>\n';
+    }
+    $('#formtaxonomy #seq_partition_table').append(additional_row_text);
+    $('#formtaxonomy #seq_partition_table').show();
+    $('#formtaxonomy #total_numparts').val(int_total_numparts.toString());
+}
+
     function closeWindowX() {
 	$("body").html("");
     }
@@ -354,7 +349,6 @@ function ValidateFormTaxonomy() {
         }
                });
     }
-
 
     function resetOnLoad(jsonOBJ) {
 	try {
@@ -523,48 +517,7 @@ function ValidateFormTaxonomy() {
 		$('.loadtaxonomy').click(function(){
 		    var authId=$(this).parent().prev().find('a').attr('id');
 		    $.postJSON(loadNewTaxonomy,{"sessionid":sessionID,activegroupid:activeGroupID,"auth_id":authId,'selectids':selectIds},function(jsonOBJ){
-			    // jdw$('#dialogloadnewform').html(jsonOBJ.htmlcontent).dialog("open");
-			    $('#dialogtaxonomyform').html(jsonOBJ.htmlcontent).dialog("open");
-			$('.ief').ief({
-			    onstart:function(){
-				if ($(this).hasClass('greyedout')){
-				    $(this).data('placeholder',$(this).html()).empty();
-				}
-			    },
-			    oncommit:function(){
-				var id = $(this).attr('id');
-				var idsplit = id.split('_');
-				var checkid = '';
-				if (idsplit[2] == 'seqbegin') checkid = idsplit[0] + '_' + idsplit[1] + '_seqend';
-				else if (idsplit[2] == 'seqend') checkid = idsplit[0] + '_' + idsplit[1] + '_seqbegin';
-                                if (checkid != '') {
-                                    var check_val = $('#' + checkid).text();
-                                    var seqtype_id = idsplit[0] + '_' + idsplit[1] + '_seqtype';
-				    if (!$(this).is(":empty") && check_val != '' && check_val != "click-to-edit") {
-                                        UpdateSeqType(seqtype_id, "Biological sequence", true);
-				    } else if ($(this).is(":empty") && ((check_val == '') || (check_val == "click-to-edit"))) {
-                                        UpdateSeqType(seqtype_id, "Biological sequence", false);
-                                        var taxid = idsplit[0] + '_' + idsplit[1] + '_taxid';
-                                        $('#' + taxid).data('placeholder',$('#' + taxid).html()).empty();
-                                        $('#' + taxid).html(placeholderVal).addClass('greyedout');
-                                    }
-                                }
-				// New filtering blank form elements --
-				if ($.trim($(this).html()).length == 0) {
-				    $(this).data('placeholder',$(this).html()).empty();
-				    $(this).html(placeholderVal).addClass('greyedout');
-				} else if ($(this).hasClass('greyedout') && !$(this).is(":empty")){
-				    $(this).removeClass('greyedout');
-				} else if ($(this).hasClass('greyedout')) {
-				    $(this).html($(this).data('placeholder')).addClass('greyedout');
-				}
-			    },
-			    oncancel:function(){
-				if ($(this).is(":empty")){
-				    $(this).html($(this).data('placeholder')).addClass('greyedout');
-				}
-			    }
-			});
+			$('#dialogtaxonomyform').html(jsonOBJ.htmlcontent).dialog("open");
 			$('.taxonomy_ajaxform').ajaxForm({
 			    beforeSubmit: function (formData, jqForm, options) {
 			        progressStart('Saving Edits ...');
@@ -576,12 +529,10 @@ function ValidateFormTaxonomy() {
                                 }
 				formData.push({name:'ref_id',value:authId});
 				formData.push({name:'selectids',value:selectIds});
-				//$('#dialogloadnewform').dialog("close");
 				$('#dialogtaxonomyform').dialog("close");
 			    },
 			    success: function (jsonOBJ) {
 				if (jsonOBJ.statuscode=='ok') {
-				    //$('#dialogloadnewform').dialog("close");
 				    $('#dialogtaxonomyform').dialog("close");
 				    resetBtns();
 				    $('#res').empty();
@@ -596,77 +547,70 @@ function ValidateFormTaxonomy() {
 				}
 			    }
 			});
-                        $('#add_row_button').click(function() {
-                            var selectvalues = '[{"value":"","label":"","selected":false},{"value":"Biological sequence","label":"Biological sequence","selected":false}]';
-                            var int_total_numparts = parseInt($('#total_numparts').val());
+                        $('#formtaxonomy #add_row_button').click(function() {
+                            addPartitonTableRows(5);
+                        });
+                        $('.toggle').click(function() {
+                            var ele = $(this).find('span.ui-icon');
+                            ele.toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
+                            $(this).parents('.head').next().toggle('slow');
+                            return false;
+                        });
+                        $('.seqbuilder_ajaxform').ajaxForm({
+                            beforeSubmit: function (formData, jqForm, options) {
+                                progressStart('Saving Seqs ...');
+                            },
+                            success: function (jsonOBJ) {
+                                progressEnd();
+                                if (jsonOBJ.statuscode == 'ok') {
+                                    if ("textcontent" in jsonOBJ) {
+                                        $('#formtaxonomy #entity_seq_1').text(jsonOBJ.textcontent);
+                                        $('#formtaxonomy #entity_seq_1').show();
+                                        $('#formtaxonomy #entity_seq_1').attr('readonly','readonly');
+                                    }
+                                    var int_total_numparts = parseInt($('#formtaxonomy #total_numparts').val());
+                                    seqPartInfoList = jsonOBJ.seqpartinfolist;
+                                    if (seqPartInfoList.length > int_total_numparts) {
+                                        addPartitonTableRows(seqPartInfoList.length - int_total_numparts);
+                                    }
+                                    for (var i = 0; i < seqPartInfoList.length; ++i) {
+                                         var i1 = i + 1;
+                                         var partId = i1.toString();
+                                         $('#formtaxonomy #p_' + partId + '_seqbegin').val(seqPartInfoList[i]["beg_num"]);
+                                         $('#formtaxonomy #p_' + partId + '_seqend').val(seqPartInfoList[i]["end_num"]);
+                                         $('#formtaxonomy #p_' + partId + '_seqtype').val("Biological sequence").change();
+                                    }
+                                    if (jsonOBJ.withref == "yes") {
+                                         $('#formtaxonomy #withref_info').val("yes");
+                                         $('#formtaxonomy #seq_search_op').prop('checked', true);
+                                    }
+                                } else {
+                                    alert(jsonOBJ.statustext);
+                                }
+                            },
+                            error: function (data, status, e) {
+                                progressEnd();
+                                alert(e);
+                            }
+                        });
+                        $('#formseqbuilder #add_row_button_seq').click(function() {
+                            var int_total_numfragments = parseInt($('#formseqbuilder #num_seq_fragments').val());
 
                             var additional_row_text = "";
-                            var tagIdList = [];
-                            for (var i = 0; i < 5; ++i) {
-                                 int_total_numparts++;
-                                 var partId = int_total_numparts.toString();
+                            for (var i = 0; i < 3; ++i) {
+                                 int_total_numfragments++;
+                                 var fragId = int_total_numfragments.toString();
                                  additional_row_text += '<tr>\n';
-                                 additional_row_text += '<td><span id="p_' + partId + '_partid">' + partId + '</span>'
-                                                      + '<input type="hidden" name="p_' + partId + '_partid" value="' + partId + '" /></td>\n';
-                                 additional_row_text += '<td><span id="p_' + partId + '_taxid">click-to-edit</span></td>\n';
-                                 additional_row_text += '<td><span id="p_' + partId + '_seqbegin">click-to-edit</span>\n';
-                                 additional_row_text += '<td><span id="p_' + partId + '_seqend">click-to-edit</span></td>\n';
-                                 additional_row_text += '<td><span id="p_' + partId + '_seqtype" data-ief-edittype="select" data-ief-selectvalues=\''
-                                                      + selectvalues + '\'>click-to-edit</span></td>\n';
-                                 additional_row_text += '</tr>\\n';
-                                 tagIdList.push('p_' + partId + '_taxid');
-                                 tagIdList.push('p_' + partId + '_seqbegin');
-                                 tagIdList.push('p_' + partId + '_seqend');
-                                 tagIdList.push('p_' + partId + '_seqtype');
+                                 additional_row_text += '<td>' + fragId + '</td>\n'
+                                 additional_row_text += '<td><input type="text" id="uniprot_id_' + fragId + '" name="uniprot_id_' + fragId + '" value="" + size="20" /></td>\n'
+                                 additional_row_text += '<td><input type="text" id="beg_uniprot_num_' + fragId + '" name="beg_uniprot_num_' + fragId + '" value="" + size="10" /></td>\n'
+                                 additional_row_text += '<td><input type="text" id="end_uniprot_num_' + fragId + '" name="end_uniprot_num_' + fragId + '" value="" + size="10" /></td>\n'
+                                 additional_row_text += '<td><input type="text" id="term_link_seq_' + fragId + '" name="term_link_seq_' + fragId + '" value="" + size="50" /></td>\n'
+                                 additional_row_text += '</tr>\n';
                             }
-                            $('#seq_partition_table').append(additional_row_text);
-
-                            for (var i = 0; i < tagIdList.length; ++i) {
-                                 $('#' + tagIdList[i]).addClass('ief');
-                                 $('#' + tagIdList[i]).addClass('greyedout');
-                                 $('#' + tagIdList[i]).ief({
-                                      onstart:function(){
-                                          if ($(this).hasClass('greyedout')){
-                                              $(this).data('placeholder',$(this).html()).empty();
-                                          }
-                                      },
-                                      oncommit:function(){
-                                          var id = $(this).attr('id');
-                                          var idsplit = id.split('_');
-                                          var checkid = '';
-                                          if (idsplit[2] == 'seqbegin') checkid = idsplit[0] + '_' + idsplit[1] + '_seqend';
-                                          else if (idsplit[2] == 'seqend') checkid = idsplit[0] + '_' + idsplit[1] + '_seqbegin';
-                                          if (checkid != '') {
-                                              var check_val = $('#' + checkid).text();
-                                              var seqtype_id = idsplit[0] + '_' + idsplit[1] + '_seqtype';
-                                              if (!$(this).is(":empty") && check_val != '' && check_val != "click-to-edit") {
-                                                  UpdateSeqType(seqtype_id, "Biological sequence", true);
-                                              } else if ($(this).is(":empty") && ((check_val == '') || (check_val == "click-to-edit"))) {
-                                                  UpdateSeqType(seqtype_id, "Biological sequence", false);
-                                                  var taxid = idsplit[0] + '_' + idsplit[1] + '_taxid';
-                                                  $('#' + taxid).data('placeholder',$('#' + taxid).html()).empty();
-                                                  $('#' + taxid).html(placeholderVal).addClass('greyedout');
-                                              }
-                                          }
-                                          // New filtering blank form elements --
-                                          if ($.trim($(this).html()).length == 0) {
-                                              $(this).data('placeholder',$(this).html()).empty();
-                                              $(this).html(placeholderVal).addClass('greyedout');
-                                          } else if ($(this).hasClass('greyedout') && !$(this).is(":empty")){
-                                              $(this).removeClass('greyedout');
-                                          } else if ($(this).hasClass('greyedout')) {
-                                              $(this).html($(this).data('placeholder')).addClass('greyedout');
-                                          }
-                                      },
-                                      oncancel:function(){
-                                          if ($(this).is(":empty")){
-                                              $(this).html($(this).data('placeholder')).addClass('greyedout');
-                                          }
-                                      }
-                                 });
-                            }
-                            $('#seq_partition_table').show();
-                            $('#total_numparts').val(int_total_numparts.toString());
+                            $('#formseqbuilder #seq_build_table').append(additional_row_text);
+                            $('#formseqbuilder #seq_build_table').show();
+                            $('#formseqbuilder #num_seq_fragments').val(int_total_numfragments.toString());
                         });
 		    });
 		});
