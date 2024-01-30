@@ -579,6 +579,9 @@ function addPartitonTableRows(additional_rows) {
                                          $('#formtaxonomy #p_' + partId + '_seqbegin').val(seqPartInfoList[i]["beg_num"]);
                                          $('#formtaxonomy #p_' + partId + '_seqend').val(seqPartInfoList[i]["end_num"]);
                                          $('#formtaxonomy #p_' + partId + '_seqtype').val("Biological sequence").change();
+                                         if ("taxonomy_id" in seqPartInfoList[i]) {
+                                             $('#formtaxonomy #p_' + partId + '_taxid').val(seqPartInfoList[i]["taxonomy_id"]);
+                                         }
                                     }
                                     if (jsonOBJ.withref == "yes") {
                                          $('#formtaxonomy #withref_info').val("yes");
